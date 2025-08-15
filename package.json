@@ -1,0 +1,31 @@
+{
+	"name": "5e-combat-dyndash-api",
+	"version": "0.0.0",
+	"description": "An API that serves 5e combat data from markdown files to DynDash applications",
+	"main": "./5e_combat_provider/5e_combat_provider.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node ./5e_combat_provider/5e_combat_provider.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/KiljanK/5e-combat-dyndash-api.git"
+	},
+	"keywords": [
+		"5e",
+		"combat",
+		"dice",
+		"dyndash"
+	],
+	"author": "KiljanK",
+	"license": "AGPL-3.0",
+	"bugs": {
+		"url": "https://github.com/KiljanK/5e-combat-dyndash-api/issues"
+	},
+	"homepage": "https://github.com/KiljanK/5e-combat-dyndash-api#readme",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.21.1",
+		"ws": "^8.18.0"
+	}
+}
