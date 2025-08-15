@@ -1,0 +1,42 @@
+{
+	"simulated-dice": {
+		"digitalDice": {
+			"0000000_D?": {
+				"info": {
+					"name": "Sim_D?",
+					"type": "d20",
+					"face": 1,
+					"battery": 100,
+					"charging": false,
+					"state": "rolled"
+				},
+				"rolls": []
+			}
+		}
+	},
+
+	"simulated-dice-controllers": {
+		"ddURL": {
+			"Cycle Dice Type (Sim_D?)": {
+				"url": "http://localhost:4453/dice/cycle",
+				"body": {
+					"id": "0000000_D?"
+				}
+			},
+
+			"Roll Dice (Sim_D?)": {
+				"url": "http://localhost:4453/dice/roll",
+				"body": {
+					"id": "0000000_D?"
+				}
+			},
+
+			"Remove Last Roll (Sim_D?)": {
+				"url": "http://localhost:4453/dice/undo",
+				"body": {
+					"id": "0000000_D?"
+				}
+			}
+		}
+	}
+}

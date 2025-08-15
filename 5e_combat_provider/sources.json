@@ -1,0 +1,25 @@
+{
+	"simulated-dice": {
+		"name": "Simulated Dice",
+		"information": "simulated dice info and its rolls",
+		"explanation": "A Source containing a singular connected dice and its most recent rolls",
+		"dataTypes": ["digitalDice"],
+		"connection": {
+			"protocol": "WS",
+			"address": "ws://localhost:4453/sources/data",
+			"endpoint": "simulated-dice"
+		}
+	},
+
+	"simulated-dice-controllers": {
+		"name": "Simulated Dice Controllers",
+		"information": "collection of urls to control sim. dice",
+		"explanation": "This Source holds a ddURL object that stores a couple of urls that can be called to control the data from connected dice",
+		"dataTypes": ["ddURL"],
+		"connection": {
+			"protocol": "WS",
+			"address": "ws://localhost:4453/sources/data",
+			"endpoint": "simulated-dice-controllers"
+		}
+	}
+}
