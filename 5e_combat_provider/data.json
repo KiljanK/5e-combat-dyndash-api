@@ -8,7 +8,8 @@
 					"face": 1,
 					"battery": 100,
 					"charging": false,
-					"state": "rolled"
+					"state": "rolled",
+					"undo": "http://localhost:4453/dice/undo"
 				},
 				"rolls": []
 			}
