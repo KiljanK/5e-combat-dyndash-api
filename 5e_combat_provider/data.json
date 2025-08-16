@@ -1,4 +1,12 @@
 {
+	"application-controllers": {
+		"ddURL": {
+			"Load Parties": {
+				"url": "http://localhost:4453/party/load"
+			}
+		}
+	},
+
 	"simulated-dice": {
 		"digitalDice": {
 			"0000000_D?": {

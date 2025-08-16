@@ -5,6 +5,7 @@ const cors = require("cors");
 const WebSocket = require("ws");
 const path = require("path");
 const fs = require("fs");
+const yamlFront = require("yaml-front-matter");
 const app = express();
 const PORT = process.env.PORT || 4453;
 const clients = new Map();
@@ -12,11 +13,15 @@ const clients = new Map();
 app.use(express.json());
 app.use(cors());
 
+const config = require("./config.json");
+
 let dataTypes = require("./types.json");
 let sources = require("./sources.json");
 let data = require("./data.json");
 
 let components = {};
+
+// region Scraper - Components
 
 let readComponentsFromDisk = async () => {
 	let dist = path.join(__dirname, "components", "dist");
@@ -45,7 +50,88 @@ let readComponentsFromDisk = async () => {
 	}
 };
 
+// region Scraper - Party
+
+let readParties = async () => {
+	for (let party_name of Object.keys(config["party-paths"])) {
+		try {
+			let party_path = config["party-paths"][party_name];
+			let source_name = `party-${party_name}`
+				.toLowerCase()
+				.replaceAll(" ", "-");
+
+			let party_object = {};
+			let player_files = [];
+			let player_count = 0;
+			let player_names = [];
+
+			try {
+				player_files = fs.readdirSync(party_path);
+			} catch (error) {
+				console.log(
+					`An error occurred while trying to find directory ${party_path}`
+				);
+			}
+
+			players: for (let player_file of player_files) {
+				let player_file_path = path.join(party_path, player_file);
+				let stat = fs.statSync(player_file_path);
+
+				if (!stat.isFile() || !`${player_file}`.endsWith(".md")) {
+					continue players;
+				}
+
+				try {
+					let player_name = player_file.replace(".md", "");
+					let player_file_content = fs.readFileSync(
+						player_file_path,
+						"utf8"
+					);
+
+					let player_yaml = yamlFront.loadFront(player_file_content);
+
+					let player_bonuses = player_yaml?.["armor-bonuses"] || [];
+
+					party_object[player_name] = {
+						base_ac: player_yaml?.["armor-class"],
+						bonuses:
+							config["standard-bonuses"].concat(player_bonuses),
+						active_bonuses: [],
+					};
+
+					player_count++;
+					player_names.push(player_name);
+				} catch (err) {
+					console.error(`Error reading file ${player_file}:`, err);
+					continue players;
+				}
+			}
+
+			data[source_name] = { "5eParty": party_object };
+
+			sources[source_name] = {
+				name: party_name,
+				information: `player information for a party of ${player_count}`,
+				explanation: `Player information of the ${player_count}-player party ${party_name} (${player_names.join(
+					", "
+				)})`,
+				dataTypes: ["5eParty"],
+				connection: {
+					protocol: "WS",
+					address: "ws://localhost:4453/sources/data",
+					endpoint: source_name,
+				},
+			};
+		} catch {
+			continue;
+		}
+	}
+};
+
+// region Scraper - Statblocks
+
 // readComponentsFromDisk();
+readParties();
 
 // region REST Routes
 
@@ -112,7 +198,7 @@ function broadcastUpdates(source, updatedData, append = []) {
 	}
 }
 
-// region Business Logic - Web Application
+// region Business Logic - Dice
 
 let nextType = {
 	unknown: "d20",
@@ -139,10 +225,6 @@ let rollFunctions = {
 };
 
 app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-	res.sendFile(path.join(__dirname, "public", "index.html"));
-});
 
 app.post("/dice/cycle", (req, res) => {
 	let currentType =
@@ -201,6 +283,38 @@ app.post("/dice/undo", (req, res) => {
 	broadcastUpdates("simulated-dice", data["simulated-dice"]);
 	res.status(200).end();
 });
+
+// region Business Logic - Party
+
+app.post("/party/load", (req, res) => {
+	readParties();
+	responseObject = {
+		dispatch: { ddSources: null },
+	};
+
+	res.json(responseObject).end();
+});
+
+app.post("/party/toggle/bonus", (req, res) => {
+	let active_bonuses =
+		data[req?.body?.party]["5eParty"][req?.body?.player]["active-bonuses"];
+
+	let bonus_index = req?.body?.bonus_index;
+
+	if (active_bonuses.includes(bonus_index)) {
+		active_bonuses.splice(active_bonuses.indexOf(bonus_index), 1);
+	} else {
+		active_bonuses.push(bonus_index);
+	}
+
+	data[req?.body?.party]["5eParty"][req?.body?.player]["active-bonuses"] =
+		active_bonuses;
+
+	broadcastUpdates(`${req?.body?.party}`, data[req?.body?.party]);
+	res.status(200).end();
+});
+
+// region Business Logic - Statblocks
 
 // region Servers and WebSockets
 

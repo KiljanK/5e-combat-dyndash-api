@@ -1,4 +1,16 @@
 {
+	"application-controllers": {
+		"name": "Application Controllers",
+		"information": "collection of api urls",
+		"explanation": "This Source holds a ddURL object that stores a couple of URLs that can be used to control the loading behavior of the application.",
+		"dataTypes": ["ddURL"],
+		"connection": {
+			"protocol": "WS",
+			"address": "ws://localhost:4453/sources/data",
+			"endpoint": "application-controllers"
+		}
+	},
+
 	"simulated-dice": {
 		"name": "Simulated Dice",
 		"information": "simulated dice info and its rolls",
