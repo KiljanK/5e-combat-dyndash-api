@@ -112,7 +112,7 @@ let readParties = async () => {
 			sources[source_name] = {
 				name: party_name,
 				information: `player information for a party of ${player_count}`,
-				explanation: `Player information of the ${player_count}-player party ${party_name} (${player_names.join(
+				explanation: `Player information of the ${player_count}-player party "${party_name}" (${player_names.join(
 					", "
 				)})`,
 				dataTypes: ["5eParty"],
@@ -128,10 +128,148 @@ let readParties = async () => {
 	}
 };
 
-// region Scraper - Statblocks
+// region Scraper - Encounter
+
+// I know that this is very repetetive code, but i'm just trying to get this to work as fast as possible
+
+let readEncounters = async (encounter_paths) => {
+	for (let encounter_name of Object.keys(encounter_paths)) {
+		try {
+			let encounter_path = encounter_paths[encounter_name];
+			let source_name = `encounter-${encounter_name}`
+				.toLowerCase()
+				.replaceAll(" ", "-");
+
+			let encounter_object = {
+				_meta: {
+					"active-statblock": undefined,
+					bonuses: config["standard-bonuses"],
+					"active-bonuses": [],
+					advantage: false,
+					disadvantage: false,
+				},
+			};
+			let statblock_files = [];
+			let statblock_count = 0;
+			let statblock_names = [];
+
+			try {
+				statblock_files = fs.readdirSync(encounter_path);
+			} catch (error) {
+				console.log(
+					`An error occurred while trying to find directory ${encounter_path}`
+				);
+			}
+
+			statblocks: for (let statblock_file of statblock_files) {
+				let statblock_file_path = path.join(
+					encounter_path,
+					statblock_file
+				);
+				let stat = fs.statSync(statblock_file_path);
+
+				if (
+					!stat.isFile() ||
+					!`${statblock_file}`.endsWith(".md") ||
+					statblock_file === "_meta"
+				) {
+					continue statblocks;
+				}
+
+				try {
+					let statblock_name = statblock_file.replace(".md", "");
+					let statblock_file_content = fs.readFileSync(
+						statblock_file_path,
+						"utf8"
+					);
+
+					let statblock_yaml = yamlFront.loadFront(
+						statblock_file_content
+					);
+
+					let statblock_bonus = statblock_yaml?.["attack-bonus"] || 0;
+
+					encounter_object[statblock_name] = {
+						"attack-bonus": statblock_bonus,
+					};
+
+					statblock_count++;
+					statblock_names.push(statblock_name);
+				} catch (err) {
+					console.error(`Error reading file ${player_file}:`, err);
+					continue statblocks;
+				}
+			}
+
+			data[source_name] = { "5eEncounter": encounter_object };
+
+			sources[source_name] = {
+				name: encounter_name,
+				information: `encounter information with ${statblock_count} statblock${
+					statblock_count > 1 ? "s" : ""
+				}`,
+				explanation: `Encounter information of the ${statblock_count}-statblock encounter "${encounter_name}" (${statblock_names.join(
+					", "
+				)})`,
+				dataTypes: ["5eEncounter"],
+				connection: {
+					protocol: "WS",
+					address: "ws://localhost:4453/sources/data",
+					endpoint: source_name,
+				},
+			};
+		} catch {
+			continue;
+		}
+	}
+};
+
+let readAllEncounters = async () => {
+	let encounter_paths = {};
+	let session_paths = config["session-paths"];
+
+	for (let session_path of session_paths) {
+		let session_encounter_names = [];
+
+		try {
+			try {
+				session_encounter_names = fs.readdirSync(session_path);
+			} catch (error) {
+				console.log(
+					`An error occurred while trying to find directory ${session_path}`
+				);
+			}
+
+			encounters: for (let session_encounter_name of session_encounter_names) {
+				let session_encounter_path = path.join(
+					session_path,
+					session_encounter_name
+				);
+				let stat = fs.statSync(session_encounter_path);
+
+				if (!stat.isDirectory()) {
+					continue encounters;
+				}
+
+				encounter_paths[session_encounter_name] =
+					session_encounter_path;
+			}
+		} catch {
+			continue;
+		}
+	}
+
+	let all_encounter_paths = {
+		...config["encounter-paths"],
+		...encounter_paths,
+	};
+
+	readEncounters(all_encounter_paths);
+};
 
 // readComponentsFromDisk();
 readParties();
+readAllEncounters();
 
 // region REST Routes
 
@@ -295,7 +433,7 @@ app.post("/party/load", (req, res) => {
 	res.json(responseObject).end();
 });
 
-app.post("/party/toggle/bonus", (req, res) => {
+app.post("/party/toggle/", (req, res) => {
 	let active_bonuses =
 		data[req?.body?.party]["5eParty"][req?.body?.player]["active-bonuses"];
 
@@ -314,7 +452,57 @@ app.post("/party/toggle/bonus", (req, res) => {
 	res.status(200).end();
 });
 
-// region Business Logic - Statblocks
+// region Business Logic - Encounter
+
+app.post("/encounter/load", (req, res) => {
+	readAllEncounters();
+	responseObject = {
+		dispatch: { ddSources: null },
+	};
+
+	res.json(responseObject).end();
+});
+
+app.post("/encounter/toggle/", (req, res) => {
+	let bonus_index = req?.body?.bonus_index;
+	let advantage = req?.body?.advantage;
+	let disadvantage = req?.body?.disadvantage;
+	let active_statblock = req?.body?.active_statblock;
+
+	if (bonus_index !== undefined) {
+		let active_bonuses =
+			data[req?.body?.encounter]["5eEncounter"]["_meta"][
+				"active-bonuses"
+			];
+
+		if (active_bonuses.includes(bonus_index)) {
+			active_bonuses.splice(active_bonuses.indexOf(bonus_index), 1);
+		} else {
+			active_bonuses.push(bonus_index);
+		}
+
+		data[req?.body?.encounter]["5eEncounter"]["_meta"]["active-bonuses"] =
+			active_bonuses;
+	}
+
+	if (advantage !== undefined) {
+		data[req?.body?.encounter]["5eEncounter"]["_meta"]["advantage"] =
+			!data[req?.body?.encounter]["5eEncounter"]["_meta"]["advantage"];
+	}
+
+	if (disadvantage !== undefined) {
+		data[req?.body?.encounter]["5eEncounter"]["_meta"]["disadvantage"] =
+			!data[req?.body?.encounter]["5eEncounter"]["_meta"]["disadvantage"];
+	}
+
+	if (active_statblock !== undefined) {
+		data[req?.body?.encounter]["5eEncounter"]["_meta"]["active-statblock"] =
+			active_statblock;
+	}
+
+	broadcastUpdates(`${req?.body?.encounter}`, data[req?.body?.encounter]);
+	res.status(200).end();
+});
 
 // region Servers and WebSockets
 

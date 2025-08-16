@@ -3,6 +3,10 @@
 		"ddURL": {
 			"Load Parties": {
 				"url": "http://localhost:4453/party/load"
+			},
+
+			"Load Encounters": {
+				"url": "http://localhost:4453/encounter/load"
 			}
 		}
 	},

@@ -14,7 +14,7 @@ The [express.js](https://expressjs.com) server scrapes information on [5e](https
 
 ## Screenshots
 
-The provided Component should be able to display Sources of the Data Type `digitalDice`, `5eParty`, and `5eStatblocks`.
+The provided Component should be able to display Sources of the Data Type `digitalDice`, `5eParty`, and `5eEncounter`.
 
 The Component allows for the selection of an active statblock from a list of loaded statblocks. It also enables the addition of situational bonuses, advantage, and disadvantage.
 
@@ -64,7 +64,7 @@ armor-bonuses:
   - "-4"
 ```
 
-The `session-paths` array expects absolute paths to folders that contain "encounter" subfolders with statblock files:
+The `encounter-paths` object works in the same way. However, it is also possible to load all encounters within a parent folder by adding the parent folder's absolute path to the `session-paths` array. In the latter case, the encounter names will be automatically generated from the folder names of each encounter.
 
 ```
 session_folder
@@ -92,7 +92,7 @@ Run the following command to start the application
 npm start
 ```
 
-Connect to a running [DynDash](https://github.com/dd-framework/DynDash) application by pasting the URL [`http://localhost:4416/`](http://localhost:4416/) into its [Config Editor](http://localhost:3002/) and hitting the `+` button, followed by the `Save` button. You should be able to select all of the things you want the application to provide (refresh the page if you aren't able to do so).
+Connect to a running [DynDash](https://github.com/dd-framework/DynDash) application by pasting the URL [`http://localhost:4453/`](http://localhost:4453/) into its [Config Editor](http://localhost:3002/) and hitting the `+` button, followed by the `Save` button. You should be able to select all of the things you want the application to provide (refresh the page if you aren't able to do so).
 
 > [!NOTE]
 > The Components of the [this application](https://github.com/KiljanK/5e-combat-dyndash-api) can be used in conjunction with the dice from the [pixels-dyndash-api](https://github.com/KiljanK/pixels-dyndash-api), since both providers use the same `digitalDice` Data Type.
