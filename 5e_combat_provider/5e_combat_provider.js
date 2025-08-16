@@ -60,7 +60,11 @@ let readParties = async () => {
 				.toLowerCase()
 				.replaceAll(" ", "-");
 
-			let party_object = {};
+			let party_object = {
+				_meta: {
+					toggle: "http://localhost:4453/party/toggle/",
+				},
+			};
 			let player_files = [];
 			let player_count = 0;
 			let player_names = [];
@@ -93,10 +97,10 @@ let readParties = async () => {
 					let player_bonuses = player_yaml?.["armor-bonuses"] || [];
 
 					party_object[player_name] = {
-						base_ac: player_yaml?.["armor-class"],
+						"base-ac": player_yaml?.["armor-class"],
 						bonuses:
 							config["standard-bonuses"].concat(player_bonuses),
-						active_bonuses: [],
+						"active-bonuses": [],
 					};
 
 					player_count++;
@@ -147,6 +151,7 @@ let readEncounters = async (encounter_paths) => {
 					"active-bonuses": [],
 					advantage: false,
 					disadvantage: false,
+					toggle: "http://localhost:4453/encounter/toggle/",
 				},
 			};
 			let statblock_files = [];
@@ -496,8 +501,18 @@ app.post("/encounter/toggle/", (req, res) => {
 	}
 
 	if (active_statblock !== undefined) {
+		let next = undefined;
+		let prev =
+			data[req?.body?.encounter]["5eEncounter"]["_meta"][
+				"active-statblock"
+			];
+
+		if (prev !== active_statblock) {
+			next = active_statblock;
+		}
+
 		data[req?.body?.encounter]["5eEncounter"]["_meta"]["active-statblock"] =
-			active_statblock;
+			next;
 	}
 
 	broadcastUpdates(`${req?.body?.encounter}`, data[req?.body?.encounter]);
