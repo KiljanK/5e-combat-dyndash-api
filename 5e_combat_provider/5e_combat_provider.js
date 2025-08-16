@@ -54,7 +54,7 @@ app.use("/icon", express.static(path.join(__dirname, "icon.svg")));
 app.use("/info", (req, res) => {
 	res.json({
 		name: "5eCombatProvider",
-		info: "This is a Provider that is capable of lading 5e Combat data out of markdown files and serving them to the DynDash application",
+		info: "This is a Provider that is capable of lading 5e Combat data out of markdown files and serving them to the DynDash application. It also houses a singular simulated dice that can be changed through API calls.",
 		provides: {
 			dashboards: false,
 			components: false,
