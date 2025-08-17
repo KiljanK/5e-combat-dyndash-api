@@ -1,8 +1,8 @@
 # 5e-combat-dyndash-api
 
-This application enables users to create [DynDash](https://github.com/dd-framework/DynDash) Dashboards to assist during [5e](https://roll20.net/compendium/dnd5e/) combat encounters.
+This application enables users to create [DynDash](https://github.com/dd-framework/DynDash) Dashboards to assist during [5e](https://roll20.net/compendium/dnd5e/) combat encounters. It is not intended to be an entire combat tracker with hit points and abilities. I simply wanted to create a tool that would quickly give me an overview on the to-hit bonuses in relation to my players' armor classes.
 
-The [express.js](https://expressjs.com) server scrapes information on [5e](https://roll20.net/compendium/dnd5e/) Characters and Creature Statblocks from simplified [Markdown](https://en.wikipedia.org/wiki/Markdown) files. It also harbors a digital dice object that can be interacted with through specific endpoints. All of this is served under the [API specification](https://github.com/dd-framework/DynDash/blob/main/example_provider/API_SPECIFICATION.md) that makes the data available to any connected [DynDash](https://github.com/dd-framework/DynDash) application.
+The [express.js](https://expressjs.com) server scrapes information on [5e](https://roll20.net/compendium/dnd5e/) Characters and Creature Statblocks from simplified [Markdown](https://en.wikipedia.org/wiki/Markdown) files ([see why](#why-markdown-files)). It also harbors a digital dice object that can be interacted with through specific endpoints. All of this is served under the [API specification](https://github.com/dd-framework/DynDash/blob/main/example_provider/API_SPECIFICATION.md) that makes the data available to any connected [DynDash](https://github.com/dd-framework/DynDash) application.
 
 ---
 
@@ -44,7 +44,7 @@ You may need to extend the `safelist` of the [`tailwind.config.js`](https://gith
 
 ## Setup
 
-As previously mentioned, the application scrapes data from Markdown files. You need to define the correct folder paths in the [configuration file](/5e_combat_provider/config.json) of this application (ideally before running it, but it might work at runtime in some cases).
+As previously mentioned, the application scrapes data from Markdown files ([see why](#why-markdown-files)). You need to define the correct folder paths in the [configuration file](/5e_combat_provider/config.json) of this application (ideally before running it, but it might work at runtime in some cases).
 
 The `party-paths` object expects party names as keys that map to absolute paths of the respective party folders that are structured like this:
 
@@ -67,14 +67,14 @@ armor-bonuses:
 The `encounter-paths` object works in the same way. However, it is also possible to load all encounters within a parent folder by adding the parent folder's absolute path to the `session-paths` array. In the latter case, the encounter names will be automatically generated from the folder names of each encounter.
 
 ```
-session_folder
+session_folder_1
 ├─ encounter_devils
 │  ├─ devil_large.md
 │  └─ imp.md
 └─ encounter_elementals
-   ├─ ice_elemental.md
+   ├─ fire_elemental.md
    ├─ water_elemental.md
-   └─ fire_elemental.md
+   └─ ice_elemental.md
 ```
 
 Each statblock file should be a Markdown file that contains a mandatory frontmatter property for `attack-bonus`:
@@ -96,6 +96,18 @@ Connect to a running [DynDash](https://github.com/dd-framework/DynDash) applicat
 
 > [!NOTE]
 > The Components of the [this application](https://github.com/KiljanK/5e-combat-dyndash-api) can be used in conjunction with the dice from the [pixels-dyndash-api](https://github.com/KiljanK/pixels-dyndash-api), since both providers use the same `digitalDice` Data Type.
+
+---
+
+## Why Markdown Files?
+
+It may seem like a really weird choice to store the relevant data in [Markdown](https://en.wikipedia.org/wiki/Markdown) files. There is no denying that it is a little unconventional.
+
+The motivation for doing it like this anyways is that I _already_ store my 5e Campaign notes and data in `.md` files and wanted to make use of the structures that were already in place.
+
+From my understanding, many people use [Markdown](https://en.wikipedia.org/wiki/Markdown) files inside [Obsidian](http://obsidian.md) or [Logseq](https://logseq.com) vaults for this very purpose as well, so I felt like this would be an acceptable way of implementing it.
+
+Additionally, the format is simple enough for people to quickly set their data up in the correct way. A good starting point for this is the [`/examples/`](/examples/README.md) directory.
 
 ---
 

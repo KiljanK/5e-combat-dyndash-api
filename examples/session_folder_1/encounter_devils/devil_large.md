@@ -1,0 +1,3 @@
+---
+attack-bonus: 8
+---
