@@ -458,6 +458,10 @@ app.post("/party/load", (req, res) => {
 });
 
 app.post("/party/toggle/", (req, res) => {
+	let bonus_index = req?.body?.bonus_index;
+	let custom_bonus_object = req?.body?.custom_bonus_object;
+	console.log(custom_bonus_object);
+
 	let active_bonuses_i =
 		data[req?.body?.party]["5eParty"][req?.body?.player][
 			"active-bonuses-indices"
@@ -468,17 +472,38 @@ app.post("/party/toggle/", (req, res) => {
 			"active-custom-bonuses"
 		];
 
-	let bonus_index = req?.body?.bonus_index;
+	// If it's about toggling the party member's bonuses
+	if (bonus_index !== undefined) {
+		if (active_bonuses_i.includes(bonus_index)) {
+			active_bonuses_i.splice(active_bonuses_i.indexOf(bonus_index), 1);
+		} else {
+			active_bonuses_i.push(bonus_index);
+		}
 
-	if (active_bonuses_i.includes(bonus_index)) {
-		active_bonuses_i.splice(active_bonuses_i.indexOf(bonus_index), 1);
-	} else {
-		active_bonuses_i.push(bonus_index);
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"active-bonuses-indices"
+		] = active_bonuses_i;
 	}
 
-	data[req?.body?.party]["5eParty"][req?.body?.player][
-		"active-bonuses-indices"
-	] = active_bonuses_i;
+	// If it's about creating or deleting the party member's custom bonuses
+	if (custom_bonus_object !== undefined) {
+		let { action, index, value } = custom_bonus_object;
+
+		// This might cause issues when multiple people quickly call this
+		// repeatedly while their Component's data is out of sync
+
+		if (action === "create" && value !== undefined) {
+			active_custom_bonuses.push(value);
+		} else if (action === "delete" && index !== undefined) {
+			if (index <= active_custom_bonuses?.length - 1) {
+				active_custom_bonuses.splice(index, 1);
+			}
+		}
+
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"active-custom-bonuses"
+		] = active_custom_bonuses;
+	}
 
 	broadcastUpdates(`${req?.body?.party}`, data[req?.body?.party]);
 	res.status(200).end();
@@ -501,6 +526,7 @@ app.post("/encounter/toggle/", (req, res) => {
 	let disadvantage = req?.body?.disadvantage;
 	let active_statblock = req?.body?.active_statblock;
 
+	// If it's about toggling the encounter's bonuses...
 	if (bonus_index !== undefined) {
 		let active_bonuses_i =
 			data[req?.body?.encounter]["5eEncounter"]["_meta"][
@@ -518,16 +544,19 @@ app.post("/encounter/toggle/", (req, res) => {
 		] = active_bonuses_i;
 	}
 
+	// If it's about toggling the encounter's advantage
 	if (advantage !== undefined) {
 		data[req?.body?.encounter]["5eEncounter"]["_meta"]["advantage"] =
 			!data[req?.body?.encounter]["5eEncounter"]["_meta"]["advantage"];
 	}
 
+	// If it's about toggling the encounter's disadvantage
 	if (disadvantage !== undefined) {
 		data[req?.body?.encounter]["5eEncounter"]["_meta"]["disadvantage"] =
 			!data[req?.body?.encounter]["5eEncounter"]["_meta"]["disadvantage"];
 	}
 
+	// If it's about toggling the encounter's active statblock
 	if (active_statblock !== undefined) {
 		let next = undefined;
 		let prev =

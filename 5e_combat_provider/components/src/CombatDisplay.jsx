@@ -649,21 +649,28 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				let member_buttons = [];
 
+				// Adding buttons for the regular bonuses
 				if (pm_bonuses.length > 0) {
 					for (let i = 0; i < pm_bonuses.length; i++) {
 						let bonusValue = pm_bonuses[i];
 						let isActive = pm_active_bonuses_i?.includes(i);
+						let bonusString = `${bonusValue}`;
+						if (
+							!bonusString.startsWith("+") &&
+							!bonusString.startsWith("-")
+						) {
+							bonusString = `+${bonusString}`;
+						}
 
 						let buttonClass = getToggleClass(isActive);
 						let buttonClick = getOnClick(partyURL, {
 							party: sourceName,
 							player: party_member_name,
 							bonus_index: i,
-							bonus_type: "regular",
 						});
 
 						let bonusButton = getButton(
-							`${bonusValue}`,
+							bonusString,
 							buttonClass,
 							buttonClick
 						);
@@ -671,6 +678,70 @@ const renderComponent = (uuid, data, slotSettings) => {
 						member_buttons.push(bonusButton);
 					}
 				}
+
+				// Adding removal-buttons for custom bonuses
+				if (pm_c_active_bonuses_values.length > 0) {
+					for (
+						let i = 0;
+						i < pm_c_active_bonuses_values.length;
+						i++
+					) {
+						let bonusValue = pm_c_active_bonuses_values[i];
+						let isActive = true;
+						let bonusString = `${bonusValue}`;
+						if (
+							!bonusString.startsWith("+") &&
+							!bonusString.startsWith("-")
+						) {
+							bonusString = `+${bonusString}`;
+						}
+
+						let buttonClass = getToggleClass(isActive);
+						let buttonClick = getOnClick(partyURL, {
+							party: sourceName,
+							player: party_member_name,
+							custom_bonus_object: {
+								action: "delete",
+								index: i,
+							},
+						});
+
+						let bonusButton = getButton(
+							bonusString,
+							buttonClass,
+							buttonClick
+						);
+
+						member_buttons.push(bonusButton);
+					}
+				}
+
+				// Adding a singular creation button for all custom Bonuses
+				let buttonClass = getToggleClass(false);
+				let buttonClick = async (e) => {
+					e.stopPropagation();
+
+					let input = prompt("Enter a custom AC-bonus value:", 0);
+					let bonus = Number(input);
+					if (!bonus) {
+						return;
+					}
+
+					let forward = getOnClick(partyURL, {
+						party: sourceName,
+						player: party_member_name,
+						custom_bonus_object: {
+							action: "create",
+							value: bonus,
+						},
+					});
+
+					forward(e);
+				};
+
+				let bonusButton = getButton(`+X`, buttonClass, buttonClick);
+
+				member_buttons.push(bonusButton);
 
 				let member_element = (
 					<li
