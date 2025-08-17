@@ -110,12 +110,15 @@ let readParties = async () => {
 
 					let player_bonuses = player_yaml?.["armor-bonuses"] || [];
 
-					party_object[player_name] = {
+					let player_object = {
 						"base-ac": player_yaml?.["armor-class"],
 						bonuses:
 							config["standard-bonuses"].concat(player_bonuses),
-						"active-bonuses": [],
+						"active-bonuses-indices": [], // list of indices related to "bonuses"
+						"active-custom-bonuses": [], // just the straight up values
 					};
+
+					party_object[player_name] = player_object;
 
 					player_count++;
 					player_names.push(player_name);
@@ -163,7 +166,7 @@ let readEncounters = async (encounter_paths) => {
 				_meta: {
 					"active-statblock": undefined,
 					bonuses: config["standard-bonuses"],
-					"active-bonuses": [],
+					"active-bonuses-indices": [],
 					advantage: false,
 					disadvantage: false,
 					toggle: "http://localhost:4453/encounter/toggle/",
@@ -455,19 +458,27 @@ app.post("/party/load", (req, res) => {
 });
 
 app.post("/party/toggle/", (req, res) => {
-	let active_bonuses =
-		data[req?.body?.party]["5eParty"][req?.body?.player]["active-bonuses"];
+	let active_bonuses_i =
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"active-bonuses-indices"
+		];
+
+	let active_custom_bonuses =
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"active-custom-bonuses"
+		];
 
 	let bonus_index = req?.body?.bonus_index;
 
-	if (active_bonuses.includes(bonus_index)) {
-		active_bonuses.splice(active_bonuses.indexOf(bonus_index), 1);
+	if (active_bonuses_i.includes(bonus_index)) {
+		active_bonuses_i.splice(active_bonuses_i.indexOf(bonus_index), 1);
 	} else {
-		active_bonuses.push(bonus_index);
+		active_bonuses_i.push(bonus_index);
 	}
 
-	data[req?.body?.party]["5eParty"][req?.body?.player]["active-bonuses"] =
-		active_bonuses;
+	data[req?.body?.party]["5eParty"][req?.body?.player][
+		"active-bonuses-indices"
+	] = active_bonuses_i;
 
 	broadcastUpdates(`${req?.body?.party}`, data[req?.body?.party]);
 	res.status(200).end();
@@ -491,19 +502,20 @@ app.post("/encounter/toggle/", (req, res) => {
 	let active_statblock = req?.body?.active_statblock;
 
 	if (bonus_index !== undefined) {
-		let active_bonuses =
+		let active_bonuses_i =
 			data[req?.body?.encounter]["5eEncounter"]["_meta"][
-				"active-bonuses"
+				"active-bonuses-indices"
 			];
 
-		if (active_bonuses.includes(bonus_index)) {
-			active_bonuses.splice(active_bonuses.indexOf(bonus_index), 1);
+		if (active_bonuses_i.includes(bonus_index)) {
+			active_bonuses_i.splice(active_bonuses_i.indexOf(bonus_index), 1);
 		} else {
-			active_bonuses.push(bonus_index);
+			active_bonuses_i.push(bonus_index);
 		}
 
-		data[req?.body?.encounter]["5eEncounter"]["_meta"]["active-bonuses"] =
-			active_bonuses;
+		data[req?.body?.encounter]["5eEncounter"]["_meta"][
+			"active-bonuses-indices"
+		] = active_bonuses_i;
 	}
 
 	if (advantage !== undefined) {

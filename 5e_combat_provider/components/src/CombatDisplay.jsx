@@ -194,9 +194,9 @@ const renderComponent = (uuid, data, slotSettings) => {
 	// Getting base information from the digitalDice rolls and 5eEncounter information
 	let e_meta = foundEncounter?.["_meta"];
 	let available_bonuses = e_meta?.["bonuses"];
-	let active_bonuses = e_meta?.["active-bonuses"];
+	let active_bonuses_i = e_meta?.["active-bonuses-indices"];
 	let e_bonuses =
-		active_bonuses?.map((index) => available_bonuses[index]) || [];
+		active_bonuses_i?.map((index) => available_bonuses[index]) || [];
 	let active_statblock = e_meta?.["active-statblock"];
 	let statblock_bonus = active_statblock
 		? foundEncounter[active_statblock]?.["attack-bonus"]
@@ -496,7 +496,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 		if (available_bonuses?.length > 0) {
 			for (let i = 0; i < available_bonuses?.length; i++) {
 				let bonusValue = available_bonuses[i];
-				let isActive = active_bonuses?.includes(i);
+				let isActive = active_bonuses_i?.includes(i);
 
 				let buttonClass = getToggleClass(isActive);
 				let buttonClick = getOnClick(statblocksURL, {
@@ -613,18 +613,15 @@ const renderComponent = (uuid, data, slotSettings) => {
 					data[sourceName][propertyName][party_member_name];
 
 				let pm_bonuses = party_member?.["bonuses"] || [];
-				let pm_active_bonuses = party_member?.["active-bonuses"] || [];
+				let pm_active_bonuses_i =
+					party_member?.["active-bonuses-indices"] || [];
 
 				let pm_active_bonus_values =
-					pm_active_bonuses?.map((index) => pm_bonuses[index]) || [];
-
-				let pm_c_bonuses = party_member?.["custom-bonuses"] || [];
-				let pm_c_active_bonuses =
-					party_member?.["active-custom-bonuses"] || [];
-
-				let pm_c_active_bonus_values =
-					pm_c_active_bonuses?.map((index) => pm_c_bonuses[index]) ||
+					pm_active_bonuses_i?.map((index) => pm_bonuses[index]) ||
 					[];
+
+				let pm_c_active_bonuses_values =
+					party_member?.["active-custom-bonuses"] || [];
 
 				let finalAC = party_member?.["base-ac"] || 0;
 				finalAC += pm_active_bonus_values.reduce(
@@ -633,7 +630,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 					},
 					0
 				);
-				finalAC += pm_c_active_bonus_values.reduce(
+				finalAC += pm_c_active_bonuses_values.reduce(
 					(accumulator, currentValue) => {
 						return Number(accumulator) + Number(currentValue);
 					},
@@ -655,7 +652,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 				if (pm_bonuses.length > 0) {
 					for (let i = 0; i < pm_bonuses.length; i++) {
 						let bonusValue = pm_bonuses[i];
-						let isActive = pm_active_bonuses?.includes(i);
+						let isActive = pm_active_bonuses_i?.includes(i);
 
 						let buttonClass = getToggleClass(isActive);
 						let buttonClick = getOnClick(partyURL, {
