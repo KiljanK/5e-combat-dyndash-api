@@ -345,7 +345,7 @@ let readAllEncounters = async () => {
 	readEncounters(all_encounter_paths);
 };
 
-// readComponentsFromDisk();
+readComponentsFromDisk();
 readParties();
 readAllEncounters();
 
@@ -359,7 +359,7 @@ app.use("/info", (req, res) => {
 		info: "This is a Provider that is capable of lading 5e Combat data out of markdown files and serving them to the DynDash application. It also houses a singular simulated dice that can be changed through API calls.",
 		provides: {
 			dashboards: false,
-			components: false,
+			components: true,
 			sources: true,
 			types: true,
 		},
@@ -367,11 +367,10 @@ app.use("/info", (req, res) => {
 });
 
 app.get("/components", async (req, res) => {
-	// if (Object.keys(components)?.length === 0) {
-	// 	await readComponentsFromDisk();
-	// }
-	// res.json(components);
-	res.json({});
+	if (Object.keys(components)?.length === 0) {
+		await readComponentsFromDisk();
+	}
+	res.json(components);
 });
 
 app.get("/types", (req, res) => {

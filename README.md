@@ -37,8 +37,16 @@ npm install
 
 You may need to extend the `safelist` of the [`tailwind.config.js`](https://github.com/dd-framework/DynDash/blob/main/tailwind.config.js) inside your DynDash application with the following lines, depending on the version of your installation:
 ```js
+"w-[75%]",
+"w-[10%]",
+"w-[15%]",
+"h-[75%]",
+"h-[30%]",
+"h-[65%]",
+"translate-x-[70%]",
 {
-  pattern: /.*(translate|top|right|left|bottom|animate).*/,
+  pattern:
+    /.*(translate|top|right|left|bottom|animate|w|h|items|justify|flex|rounded|px|py|p).*/,
 },
 ```
 
