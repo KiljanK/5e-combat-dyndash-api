@@ -16,13 +16,15 @@ The [express.js](https://expressjs.com) server scrapes information on [5e](https
 
 The provided Component should be able to display Sources of the Data Type `digitalDice`, `5eParty`, and `5eEncounter`.
 
-The Component allows for the selection of an active statblock from a list of loaded statblocks. It also enables the addition of situational bonuses, advantage, and disadvantage.
+The Component allows for the selection of an active statblock from a list of loaded statblocks (bottom left). It also enables the addition of situational bonuses, advantage, and disadvantage.
 
-It displays the result of the most recent roll(s) based on the selected statblock and other selections.
+It displays the result of the most recent roll(s) based on the selected statblock and other selected bonuses / settings (top left).
 
-Finally, it lists all party members with information on whether or not the result has hit their AC. It also allows for the selection of situational bonuses for the individual party members.
+Finally, it lists all party members with information on whether or not the result has hit their AC (right). It also allows for the selection of situational bonuses for the individual party members.
 
-<!-- ![Component_Screenshot](/resources/Example_Screenshot.png) -->
+![Component_Screenshot](/resources/Example_Screenshot.png)
+
+I am strongly considering breaking up these three panes into separate Components for individual use, to allow for reordering them on the Dashboard, instead of confining them to this rigid structure (which kind of goes against the idea of flexible dashboarding).
 
 ---
 
@@ -55,13 +57,19 @@ party_folder
 └─ player_C.md
 ```
 
-Each player file should be a Markdown file that contains a mandatory frontmatter property for `armor-class` and an optional property for potential `armor-bonuses` that stray from the common `+2` and `+5` bonuses related to cover:
+Each player file should be a Markdown file that contains a mandatory frontmatter property for `armor-class` and an optional property for potential `armor-bonuses` that stray from the common `+2` and `+5` bonuses related to cover.
 
-```yaml
-armor-class: 15
+Additionally, as seen in the example below, a player file might include an embedded image of the character. To allow the application to load these images, ensure that the linked image is only referred to by its direct file name (no prepended directories) and add the absolute path of its parent directory to the `image-paths` array inside of the [configuration file](/5e_combat_provider/config.json). The application checks for embedded images in the formats `![name](image_name.ext)` and `![[image_name.ext]]`. When using the latter, ensure that the wikilink does not have an alias (`![[image_name.ext|alias]]`).
+
+```markdown
+---
+armor-class: 12
 armor-bonuses:
-  - "+1"
+  - "3"
   - "-4"
+---
+
+![[figure_a.png]]
 ```
 
 The `encounter-paths` object works in the same way. However, it is also possible to load all encounters within a parent folder by adding the parent folder's absolute path to the `session-paths` array. In the latter case, the encounter names will be automatically generated from the folder names of each encounter.
@@ -79,8 +87,10 @@ session_folder_1
 
 Each statblock file should be a Markdown file that contains a mandatory frontmatter property for `attack-bonus`:
 
-```yaml
+```markdown
+---
 attack-bonus: 3
+---
 ```
 
 ---

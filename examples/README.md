@@ -21,6 +21,11 @@ Your [configuration file](/5e_combat_provider/config.json) may look like this (w
 		"PASTE YOUR ABSOLUTE PATH TO THE FOLDER /examples/session_folder_1 HERE FOR TESTING, OR CHOOSE YOUR OWN FOLDER"
 	],
 
+	"image-paths": [
+		"PASTE YOUR ABSOLUTE PATH TO THE FOLDER /examples/images_a HERE FOR TESTING, OR CHOOSE YOUR OWN FOLDER",
+		"PASTE YOUR ABSOLUTE PATH TO THE FOLDER /examples/images_b HERE FOR TESTING, OR CHOOSE YOUR OWN FOLDER",
+	],
+
 	"standard-bonuses": ["+2", "+5"]
 }
 

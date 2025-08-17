@@ -2,5 +2,6 @@
 	"party-paths": {},
 	"encounter-paths": {},
 	"session-paths": [],
+	"image-paths": [],
 	"standard-bonuses": ["+2", "+5"]
 }

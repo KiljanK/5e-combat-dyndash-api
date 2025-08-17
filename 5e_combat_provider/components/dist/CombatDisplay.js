@@ -384,6 +384,7 @@ var renderComponent = (uuid, data, slotSettings) => {
           continue;
         }
         let party_member = data[sourceName][propertyName][party_member_name];
+        let pm_icon = party_member?.["image-link"];
         let pm_bonuses = party_member?.["bonuses"] || [];
         let pm_active_bonuses_i = party_member?.["active-bonuses-indices"] || [];
         let pm_active_bonus_values = pm_active_bonuses_i?.map((index) => pm_bonuses[index]) || [];
@@ -469,17 +470,25 @@ var renderComponent = (uuid, data, slotSettings) => {
         let member_element = /* @__PURE__ */ React.createElement(
           "li",
           {
-            className: "relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg",
+            className: "relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg ",
             style: { backgroundColor: member_color }
           },
-          /* @__PURE__ */ React.createElement("span", { className: "flex flex-row w-[30%] flex px-2 justify-between" }, /* @__PURE__ */ React.createElement("p", { className: "" }, party_member_name), /* @__PURE__ */ React.createElement(
+          /* @__PURE__ */ React.createElement("span", { className: "flex flex-row w-[15%] flex items-center px-4 justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "h-20 w-fit relative" }, /* @__PURE__ */ React.createElement(
+            "img",
+            {
+              src: pm_icon,
+              alt: `Icon for Player ${party_member_name}`,
+              className: "h-full object-contain"
+            }
+          ), /* @__PURE__ */ React.createElement(
             "code",
             {
-              className: `bg-gray-500 p-1 text-xs rounded-md`
+              className: `absolute bottom-0 right-0 translate-x-1/2 bg-gray-500 p-1 text-xs rounded-md`
             },
             finalAC
-          )),
-          /* @__PURE__ */ React.createElement("ul", { className: "w-[70%] flex p-2 justify-end space-x-2" }, member_buttons),
+          ))),
+          /* @__PURE__ */ React.createElement("p", { className: "w-[10%] text-left" }, party_member_name),
+          /* @__PURE__ */ React.createElement("ul", { className: "w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2" }, member_buttons),
           isHitBy > 0 ? /* @__PURE__ */ React.createElement(
             "p",
             {

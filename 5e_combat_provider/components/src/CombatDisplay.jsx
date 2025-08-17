@@ -613,6 +613,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 				let party_member =
 					data[sourceName][propertyName][party_member_name];
 
+				let pm_icon = party_member?.["image-link"];
+
 				let pm_bonuses = party_member?.["bonuses"] || [];
 				let pm_active_bonuses_i =
 					party_member?.["active-bonuses-indices"] || [];
@@ -734,18 +736,26 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				let member_element = (
 					<li
-						className="relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg"
+						className="relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg "
 						style={{ backgroundColor: member_color }}
 					>
-						<span className="flex flex-row w-[30%] flex px-2 justify-between">
-							<p className="">{party_member_name}</p>
-							<code
-								className={`bg-gray-500 p-1 text-xs rounded-md`}
-							>
-								{finalAC}
-							</code>
+						<span className="flex flex-row w-[15%] flex items-center px-4 justify-between">
+							<div className="h-20 w-fit relative">
+								<img
+									src={pm_icon}
+									alt={`Icon for Player ${party_member_name}`}
+									className="h-full object-contain"
+								/>
+								<code
+									className={`absolute bottom-0 right-0 translate-x-1/2 bg-gray-500 p-1 text-xs rounded-md`}
+								>
+									{finalAC}
+								</code>
+							</div>
 						</span>
-						<ul className="w-[70%] flex p-2 justify-end space-x-2">
+						<p className="w-[10%] text-left">{party_member_name}</p>
+
+						<ul className="w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2">
 							{member_buttons}
 						</ul>
 						{isHitBy > 0 ? (

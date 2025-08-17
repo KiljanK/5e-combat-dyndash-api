@@ -52,6 +52,10 @@ yarn-error.log*
 /component_compiler/dist/*
 /component_compiler/temp/*
 
+# Image Serving Stuff:
+/5e_combat_provider/temp/*
+!/5e_combat_provider/temp/player_placeholder.png
+
 # SOURCE: https://github.com/facebook/react/blob/main/.gitignore
 .DS_STORE
 node_modules

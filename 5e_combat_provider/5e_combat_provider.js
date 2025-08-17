@@ -63,10 +63,41 @@ let readConfig = async () => {
 	}
 };
 
+// region Scraper - Images
+
+let readImages = async () => {
+	readConfig();
+
+	let image_directory_paths = config["image-paths"];
+	let temp_directory = path.join(__dirname, "temp");
+
+	fs.mkdirSync(temp_directory, { recursive: true });
+
+	for (let image_directory_path of image_directory_paths) {
+		try {
+			const files = fs.readdirSync(image_directory_path);
+
+			for (let file of files) {
+				const sourcePath = path.join(image_directory_path, file);
+				if (/\.(jpg|jpeg|png|gif|bmp|svg|webp|tiff|tif)$/i.test(file)) {
+					const destPath = path.join(temp_directory, file);
+					fs.copyFileSync(sourcePath, destPath);
+				}
+			}
+		} catch (error) {
+			console.error(
+				`Error reading directory ${image_directory_path}:`,
+				error
+			);
+		}
+	}
+};
+
 // region Scraper - Party
 
 let readParties = async () => {
 	readConfig();
+	readImages();
 	for (let party_name of Object.keys(config["party-paths"])) {
 		try {
 			let party_path = config["party-paths"][party_name];
@@ -99,6 +130,7 @@ let readParties = async () => {
 					continue players;
 				}
 
+				// Getting the player information
 				try {
 					let player_name = player_file.replace(".md", "");
 					let player_file_content = fs.readFileSync(
@@ -106,11 +138,33 @@ let readParties = async () => {
 						"utf8"
 					);
 
+					let player_images = [];
+					let player_image = "player_placeholder.png";
+
+					player_images = player_file_content?.match(
+						/!\[([^\]]+?)\]\(([^)]+\.(?:jpg|jpeg|png|gif|bmp|svg|webp|tiff|tif))\)|!\[\[([^\]]+\.(?:jpg|jpeg|png|gif|bmp|svg|webp|tiff|tif))\]\]|\!\[\[([^\]]+?)\|([^\]]+?)\]\]/g
+					);
+
+					if (player_images?.length > 0) {
+						let likely_player_image = player_images[0];
+
+						let filename_regex =
+							/(?<=\(|\[\[)([^)\[]+?\.(?:jpg|jpeg|png|gif|bmp|svg|webp|tiff|tif))(?!\|)/;
+
+						let actual_filename =
+							likely_player_image.match(filename_regex);
+
+						if (actual_filename?.length > 0) {
+							player_image = actual_filename[0] || player_image;
+						}
+					}
+
 					let player_yaml = yamlFront.loadFront(player_file_content);
 
 					let player_bonuses = player_yaml?.["armor-bonuses"] || [];
 
 					let player_object = {
+						"image-link": `http://localhost:4453/${player_image}`,
 						"base-ac": player_yaml?.["armor-class"],
 						bonuses:
 							config["standard-bonuses"].concat(player_bonuses),
@@ -576,6 +630,8 @@ app.post("/encounter/toggle/", (req, res) => {
 });
 
 // region Servers and WebSockets
+
+app.use(express.static(path.join(__dirname, "temp")));
 
 let restServer = app.listen(PORT, () =>
 	console.log(`Server running on port ${PORT}`)

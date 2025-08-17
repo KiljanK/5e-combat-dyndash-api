@@ -2,5 +2,6 @@
 armor-class: 15
 armor-bonuses:
   - "+1"
-  - "-4"
 ---
+
+![[figure_b.png]]
