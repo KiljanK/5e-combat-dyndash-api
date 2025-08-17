@@ -88,6 +88,13 @@ var renderComponent = (uuid, data, slotSettings) => {
     }
     if (foundEncounter) break;
   }
+  let getBonusString = (input) => {
+    let bonusString = `${input}`;
+    if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
+      bonusString = `+${bonusString}`;
+    }
+    return bonusString;
+  };
   let criticalFailureColor = slotSettings?.colors?.[`general/diceCriticalFailure`] || "rgba(219, 50, 50, 1)";
   let criticalSuccessColor = slotSettings?.colors?.[`general/diceCriticalSuccess`] || "rgba(89, 211, 83, 1)";
   let iconColor = "rgba(255, 255, 255)";
@@ -209,16 +216,13 @@ var renderComponent = (uuid, data, slotSettings) => {
   }
   if (e_bonuses) {
     for (let e_bonus of e_bonuses) {
-      let bonusString = `${e_bonus}`;
-      if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-        bonusString = `+${bonusString}`;
-      }
+      let bonusString = getBonusString(e_bonus);
       let e_bonus_element = /* @__PURE__ */ React.createElement(
         "code",
         {
           className: `bg-gray-500 p-1 rounded-md`
         },
-        `${e_bonus}`
+        `${bonusString}`
       );
       resultAddends.push(
         /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, e_bonus_element), /* @__PURE__ */ React.createElement("p", null, "Encounter"))
@@ -226,10 +230,7 @@ var renderComponent = (uuid, data, slotSettings) => {
     }
   }
   if (statblock_bonus) {
-    let bonusString = `${statblock_bonus}`;
-    if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-      bonusString = `+${bonusString}`;
-    }
+    let bonusString = getBonusString(statblock_bonus);
     let statblock_bonus_element = /* @__PURE__ */ React.createElement("code", { className: `bg-gray-500 p-1 rounded-md` }, bonusString);
     resultAddends.push(
       /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, statblock_bonus_element), /* @__PURE__ */ React.createElement("p", null, active_statblock))
@@ -334,10 +335,7 @@ var renderComponent = (uuid, data, slotSettings) => {
     for (let statblock of Object.keys(foundEncounter)) {
       if (statblock === "_meta") continue;
       let attack_bonus = foundEncounter[statblock]?.["attack-bonus"];
-      let bonusString = `${attack_bonus}`;
-      if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-        bonusString = `+${bonusString}`;
-      }
+      let bonusString = getBonusString(attack_bonus);
       let isActive = statblock === active_statblock;
       let buttonClass = getStatblockClass(isActive);
       let buttonClick = getOnClick(statblocksURL, {
@@ -411,10 +409,7 @@ var renderComponent = (uuid, data, slotSettings) => {
           for (let i = 0; i < pm_bonuses.length; i++) {
             let bonusValue = pm_bonuses[i];
             let isActive = pm_active_bonuses_i?.includes(i);
-            let bonusString = `${bonusValue}`;
-            if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-              bonusString = `+${bonusString}`;
-            }
+            let bonusString = getBonusString(bonusValue);
             let buttonClass2 = getToggleClass(isActive);
             let buttonClick2 = getOnClick(partyURL, {
               party: sourceName,
@@ -433,10 +428,7 @@ var renderComponent = (uuid, data, slotSettings) => {
           for (let i = 0; i < pm_c_active_bonuses_values.length; i++) {
             let bonusValue = pm_c_active_bonuses_values[i];
             let isActive = true;
-            let bonusString = `${bonusValue}`;
-            if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-              bonusString = `+${bonusString}`;
-            }
+            let bonusString = getBonusString(bonusValue);
             let buttonClass2 = getToggleClass(isActive);
             let buttonClick2 = getOnClick(partyURL, {
               party: sourceName,

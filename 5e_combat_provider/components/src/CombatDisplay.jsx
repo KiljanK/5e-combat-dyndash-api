@@ -179,6 +179,16 @@ const renderComponent = (uuid, data, slotSettings) => {
 		if (foundEncounter) break;
 	}
 
+	// Doing some setup that will be used in various places
+
+	let getBonusString = (input) => {
+		let bonusString = `${input}`;
+		if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
+			bonusString = `+${bonusString}`;
+		}
+		return bonusString;
+	};
+
 	let criticalFailureColor =
 		slotSettings?.colors?.[`general/diceCriticalFailure`] ||
 		"rgba(219, 50, 50, 1)";
@@ -343,15 +353,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 	// Bonus-Based Addends
 	if (e_bonuses) {
 		for (let e_bonus of e_bonuses) {
-			let bonusString = `${e_bonus}`;
-			if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-				bonusString = `+${bonusString}`;
-			}
+			let bonusString = getBonusString(e_bonus);
 
 			let e_bonus_element = (
 				<code
 					className={`bg-gray-500 p-1 rounded-md`}
-				>{`${e_bonus}`}</code>
+				>{`${bonusString}`}</code>
 			);
 
 			resultAddends.push(
@@ -365,10 +372,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 	// Statblock-Based Addends
 	if (statblock_bonus) {
-		let bonusString = `${statblock_bonus}`;
-		if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-			bonusString = `+${bonusString}`;
-		}
+		let bonusString = getBonusString(statblock_bonus);
 
 		let statblock_bonus_element = (
 			<code className={`bg-gray-500 p-1 rounded-md`}>{bonusString}</code>
@@ -529,10 +533,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 			if (statblock === "_meta") continue;
 
 			let attack_bonus = foundEncounter[statblock]?.["attack-bonus"];
-			let bonusString = `${attack_bonus}`;
-			if (!bonusString.startsWith("+") && !bonusString.startsWith("-")) {
-				bonusString = `+${bonusString}`;
-			}
+			let bonusString = getBonusString(attack_bonus);
 
 			let isActive = statblock === active_statblock;
 
@@ -654,13 +655,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 					for (let i = 0; i < pm_bonuses.length; i++) {
 						let bonusValue = pm_bonuses[i];
 						let isActive = pm_active_bonuses_i?.includes(i);
-						let bonusString = `${bonusValue}`;
-						if (
-							!bonusString.startsWith("+") &&
-							!bonusString.startsWith("-")
-						) {
-							bonusString = `+${bonusString}`;
-						}
+						let bonusString = getBonusString(bonusValue);
 
 						let buttonClass = getToggleClass(isActive);
 						let buttonClick = getOnClick(partyURL, {
@@ -688,13 +683,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 					) {
 						let bonusValue = pm_c_active_bonuses_values[i];
 						let isActive = true;
-						let bonusString = `${bonusValue}`;
-						if (
-							!bonusString.startsWith("+") &&
-							!bonusString.startsWith("-")
-						) {
-							bonusString = `+${bonusString}`;
-						}
+						let bonusString = getBonusString(bonusValue);
 
 						let buttonClass = getToggleClass(isActive);
 						let buttonClick = getOnClick(partyURL, {

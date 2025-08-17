@@ -460,7 +460,6 @@ app.post("/party/load", (req, res) => {
 app.post("/party/toggle/", (req, res) => {
 	let bonus_index = req?.body?.bonus_index;
 	let custom_bonus_object = req?.body?.custom_bonus_object;
-	console.log(custom_bonus_object);
 
 	let active_bonuses_i =
 		data[req?.body?.party]["5eParty"][req?.body?.player][
