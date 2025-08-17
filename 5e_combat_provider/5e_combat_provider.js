@@ -13,7 +13,7 @@ const clients = new Map();
 app.use(express.json());
 app.use(cors());
 
-const config = require("./config.json");
+let config = require("./config.json");
 
 let dataTypes = require("./types.json");
 let sources = require("./sources.json");
@@ -50,9 +50,23 @@ let readComponentsFromDisk = async () => {
 	}
 };
 
+// region Scraper - Config
+
+let readConfig = async () => {
+	let config_path = path.join(__dirname, "config.json");
+
+	try {
+		const readConfig = fs.readFileSync(config_path, "utf8");
+		config = JSON.parse(readConfig);
+	} catch (err) {
+		console.error(`Error reading config file:`, err);
+	}
+};
+
 // region Scraper - Party
 
 let readParties = async () => {
+	readConfig();
 	for (let party_name of Object.keys(config["party-paths"])) {
 		try {
 			let party_path = config["party-paths"][party_name];
@@ -137,6 +151,7 @@ let readParties = async () => {
 // I know that this is very repetetive code, but i'm just trying to get this to work as fast as possible
 
 let readEncounters = async (encounter_paths) => {
+	readConfig();
 	for (let encounter_name of Object.keys(encounter_paths)) {
 		try {
 			let encounter_path = encounter_paths[encounter_name];
@@ -230,6 +245,7 @@ let readEncounters = async (encounter_paths) => {
 };
 
 let readAllEncounters = async () => {
+	readConfig();
 	let encounter_paths = {};
 	let session_paths = config["session-paths"];
 

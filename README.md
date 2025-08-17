@@ -44,7 +44,7 @@ You may need to extend the `safelist` of the [`tailwind.config.js`](https://gith
 
 ## Setup
 
-As previously mentioned, the application scrapes data from Markdown files. You need to define the correct folder paths in the [configuration file](/5e_combat_provider/config.json) of this application before running it.
+As previously mentioned, the application scrapes data from Markdown files. You need to define the correct folder paths in the [configuration file](/5e_combat_provider/config.json) of this application (ideally before running it, but it might work at runtime in some cases).
 
 The `party-paths` object expects party names as keys that map to absolute paths of the respective party folders that are structured like this:
 
