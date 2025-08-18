@@ -389,6 +389,9 @@ var renderComponent = (uuid, data, slotSettings) => {
         let pm_active_bonuses_i = party_member?.["active-bonuses-indices"] || [];
         let pm_active_bonus_values = pm_active_bonuses_i?.map((index) => pm_bonuses[index]) || [];
         let pm_c_active_bonuses_values = party_member?.["active-custom-bonuses"] || [];
+        let pm_external_bonuses = party_member?.["external-bonuses"] || {};
+        let pm_external_bonuses_names = Object.keys(pm_external_bonuses);
+        let pm_external_bonuses_values = Object.values(pm_external_bonuses);
         let finalAC = party_member?.["base-ac"] || 0;
         finalAC += pm_active_bonus_values.reduce(
           (accumulator, currentValue) => {
@@ -402,10 +405,17 @@ var renderComponent = (uuid, data, slotSettings) => {
           },
           0
         );
+        finalAC += pm_external_bonuses_values.reduce(
+          (accumulator, currentValue) => {
+            return Number(accumulator) + Number(currentValue);
+          },
+          0
+        );
         let isHitBy = finalRollResult - finalAC;
         let customHitColor = slotSettings?.colors?.[`${sourceName}/${party_member_name}`] || hitColor;
         let member_color = isHitBy >= 0 ? customHitColor : "rgba(66, 66, 66, 0.33)";
         let member_buttons = [];
+        let member_externals = [];
         if (pm_bonuses.length > 0) {
           for (let i = 0; i < pm_bonuses.length; i++) {
             let bonusValue = pm_bonuses[i];
@@ -467,6 +477,12 @@ var renderComponent = (uuid, data, slotSettings) => {
         };
         let bonusButton = getButton(`+X`, buttonClass, buttonClick);
         member_buttons.push(bonusButton);
+        for (let pm_external_bonus of pm_external_bonuses_names) {
+          let value = pm_external_bonuses[pm_external_bonus];
+          member_externals.push(
+            /* @__PURE__ */ React.createElement("li", { className: "flex flex-col text-sm rounded-md px-4 text-white rounded-md bg-gray-500/50 shadow-md" }, /* @__PURE__ */ React.createElement("p", null, value), /* @__PURE__ */ React.createElement("p", null, pm_external_bonus))
+          );
+        }
         let member_element = /* @__PURE__ */ React.createElement(
           "li",
           {
@@ -488,7 +504,7 @@ var renderComponent = (uuid, data, slotSettings) => {
             finalAC
           ))),
           /* @__PURE__ */ React.createElement("p", { className: "w-[10%] text-left" }, party_member_name),
-          /* @__PURE__ */ React.createElement("ul", { className: "w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2" }, member_buttons),
+          /* @__PURE__ */ React.createElement("ul", { className: "w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2" }, member_externals, member_buttons),
           isHitBy > 0 ? /* @__PURE__ */ React.createElement(
             "p",
             {

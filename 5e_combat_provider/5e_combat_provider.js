@@ -170,6 +170,7 @@ let readParties = async () => {
 							config["standard-bonuses"].concat(player_bonuses),
 						"active-bonuses-indices": [], // list of indices related to "bonuses"
 						"active-custom-bonuses": [], // just the straight up values
+						"external-bonuses": {},
 					};
 
 					party_object[player_name] = player_object;
@@ -513,6 +514,7 @@ app.post("/party/load", (req, res) => {
 app.post("/party/toggle/", (req, res) => {
 	let bonus_index = req?.body?.bonus_index;
 	let custom_bonus_object = req?.body?.custom_bonus_object;
+	let external_bonus_object = req?.body?.external_bonus_object;
 
 	let active_bonuses_i =
 		data[req?.body?.party]["5eParty"][req?.body?.player][
@@ -522,6 +524,11 @@ app.post("/party/toggle/", (req, res) => {
 	let active_custom_bonuses =
 		data[req?.body?.party]["5eParty"][req?.body?.player][
 			"active-custom-bonuses"
+		];
+
+	let external_bonuses =
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"external-bonuses"
 		];
 
 	// If it's about toggling the party member's bonuses
@@ -555,6 +562,21 @@ app.post("/party/toggle/", (req, res) => {
 		data[req?.body?.party]["5eParty"][req?.body?.player][
 			"active-custom-bonuses"
 		] = active_custom_bonuses;
+	}
+
+	// If it's about adding or deleting the external bonuses to or from a party member
+	if (external_bonus_object !== undefined) {
+		let { action, name, value } = external_bonus_object;
+
+		if (action === "create" && value !== undefined) {
+			external_bonuses[name] = value;
+		} else if (action === "delete" && name !== undefined) {
+			delete external_bonuses[name];
+		}
+
+		data[req?.body?.party]["5eParty"][req?.body?.player][
+			"external-bonuses"
+		] = external_bonuses;
 	}
 
 	broadcastUpdates(`${req?.body?.party}`, data[req?.body?.party]);

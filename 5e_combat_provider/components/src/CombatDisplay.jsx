@@ -626,6 +626,15 @@ const renderComponent = (uuid, data, slotSettings) => {
 				let pm_c_active_bonuses_values =
 					party_member?.["active-custom-bonuses"] || [];
 
+				let pm_external_bonuses =
+					party_member?.["external-bonuses"] || {};
+
+				let pm_external_bonuses_names =
+					Object.keys(pm_external_bonuses);
+
+				let pm_external_bonuses_values =
+					Object.values(pm_external_bonuses);
+
 				let finalAC = party_member?.["base-ac"] || 0;
 				finalAC += pm_active_bonus_values.reduce(
 					(accumulator, currentValue) => {
@@ -634,6 +643,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 					0
 				);
 				finalAC += pm_c_active_bonuses_values.reduce(
+					(accumulator, currentValue) => {
+						return Number(accumulator) + Number(currentValue);
+					},
+					0
+				);
+				finalAC += pm_external_bonuses_values.reduce(
 					(accumulator, currentValue) => {
 						return Number(accumulator) + Number(currentValue);
 					},
@@ -651,6 +666,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 					isHitBy >= 0 ? customHitColor : "rgba(66, 66, 66, 0.33)";
 
 				let member_buttons = [];
+				let member_externals = [];
 
 				// Adding buttons for the regular bonuses
 				if (pm_bonuses.length > 0) {
@@ -734,6 +750,16 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				member_buttons.push(bonusButton);
 
+				for (let pm_external_bonus of pm_external_bonuses_names) {
+					let value = pm_external_bonuses[pm_external_bonus];
+					member_externals.push(
+						<li className="flex flex-col text-sm rounded-md px-4 text-white rounded-md bg-gray-500/50 shadow-md">
+							<p>{value}</p>
+							<p>{pm_external_bonus}</p>
+						</li>
+					);
+				}
+
 				let member_element = (
 					<li
 						className="relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg "
@@ -756,6 +782,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 						<p className="w-[10%] text-left">{party_member_name}</p>
 
 						<ul className="w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2">
+							{member_externals}
 							{member_buttons}
 						</ul>
 						{isHitBy > 0 ? (
