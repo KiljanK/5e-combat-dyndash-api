@@ -336,7 +336,18 @@ var renderComponent = (uuid, data, slotSettings) => {
         bonusButtons.push(bonusButton);
       }
     }
-    let buttonPanel = /* @__PURE__ */ React.createElement("span", { className: "w-full h-[20%] flex flex-row justify-around items-center bg-gray-700/10 rounded-lg" }, advantageButton, disadvantageButton, bonusButtons);
+    let buttonPanel = /* @__PURE__ */ React.createElement(
+      "span",
+      {
+        className: "w-full h-[20%] flex flex-row justify-around items-center bg-gray-300/10 rounded-lg",
+        onClick: (e) => {
+          e.stopPropagation();
+        }
+      },
+      advantageButton,
+      disadvantageButton,
+      bonusButtons
+    );
     let statblocks = [];
     for (let statblock of Object.keys(foundEncounter)) {
       if (statblock === "_meta") continue;
@@ -359,19 +370,24 @@ var renderComponent = (uuid, data, slotSettings) => {
       );
       statblocks.push(statblockButton);
     }
-    let statblockList = /* @__PURE__ */ React.createElement("div", { className: "w-full h-[75%] overflow-scroll bg-gray-700/10 rounded-lg" }, /* @__PURE__ */ React.createElement("p", { className: "py-2 text-xl" }, foundEncounterName), /* @__PURE__ */ React.createElement("ul", { className: "flex flex-col items-center space-y-2" }, statblocks));
+    let encounterTitle = /* @__PURE__ */ React.createElement("p", { className: "py-2 text-xl" }, foundEncounterName);
+    if (slotSettings?.exclude?.includes(`${foundEncounterName}/title`)) {
+      encounterTitle = null;
+    }
+    let statblockList = /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "w-full h-[75%] overflow-scroll bg-gray-300/10 rounded-lg py-2",
+        onClick: (e) => {
+          e.stopPropagation();
+        }
+      },
+      encounterTitle,
+      /* @__PURE__ */ React.createElement("ul", { className: "flex flex-col items-center space-y-2" }, statblocks)
+    );
     encounterElements.push(buttonPanel, statblockList);
   }
-  let encounterPane = /* @__PURE__ */ React.createElement(
-    "div",
-    {
-      className: "flex flex-col w-full h-full justify-between items-center",
-      onClick: (e) => {
-        e.stopPropagation();
-      }
-    },
-    encounterElements
-  );
+  let encounterPane = /* @__PURE__ */ React.createElement("div", { className: "flex flex-col w-full h-full justify-between items-center" }, encounterElements);
   let hitColor = slotSettings?.colors?.["general/hit"] || "rgba(64, 172, 83, 1)";
   let partyElements = [];
   for (let sourceName in data) {
@@ -500,15 +516,18 @@ var renderComponent = (uuid, data, slotSettings) => {
         let member_element = /* @__PURE__ */ React.createElement(
           "li",
           {
-            className: "relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg ",
-            style: { backgroundColor: member_color }
+            className: "relative w-[90%] h-fit flex flex-row items-center justify-start py-1 rounded-md shadow-lg ",
+            style: { backgroundColor: member_color },
+            onClick: (e) => {
+              e.stopPropagation();
+            }
           },
-          /* @__PURE__ */ React.createElement("span", { className: "flex flex-row w-[15%] flex items-center px-4 justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "h-20 w-fit relative" }, /* @__PURE__ */ React.createElement(
+          /* @__PURE__ */ React.createElement("span", { className: "flex flex-row w-[15%] flex items-center px-4 justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "h-20 flex items-center w-fit relative" }, /* @__PURE__ */ React.createElement(
             "img",
             {
               src: pm_icon,
               alt: `Icon for Player ${party_member_name}`,
-              className: "h-full object-contain"
+              className: "h-[90%] object-contain"
             }
           ), /* @__PURE__ */ React.createElement(
             "code",
@@ -532,20 +551,15 @@ var renderComponent = (uuid, data, slotSettings) => {
         );
         memberElements.push(member_element);
       }
-      let partyElement = /* @__PURE__ */ React.createElement("div", { className: "w-full h-fit py-4 bg-gray-700/10 rounded-lg" }, /* @__PURE__ */ React.createElement("p", { className: "py-2 text-xl" }, sourceName), /* @__PURE__ */ React.createElement("ul", { className: "flex flex-col items-center space-y-2" }, memberElements));
+      let partyTitle = /* @__PURE__ */ React.createElement("p", { className: "py-2 text-xl" }, sourceName);
+      if (slotSettings?.exclude?.includes(`${sourceName}/title`)) {
+        partyTitle = null;
+      }
+      let partyElement = /* @__PURE__ */ React.createElement("div", { className: "w-full h-fit py-4 bg-gray-300/10 rounded-lg" }, partyTitle, /* @__PURE__ */ React.createElement("ul", { className: "flex flex-col items-center space-y-2" }, memberElements));
       partyElements.push(partyElement);
     }
   }
-  let partyPane = /* @__PURE__ */ React.createElement(
-    "div",
-    {
-      className: "flex flex-col w-full h-full overflow-scroll space-y-4 p-2 justify-around items-center",
-      onClick: (e) => {
-        e.stopPropagation();
-      }
-    },
-    partyElements
-  );
+  let partyPane = /* @__PURE__ */ React.createElement("div", { className: "flex flex-col w-full h-full overflow-scroll space-y-4 p-2 justify-around items-center" }, partyElements);
   let backgroundColor = slotSettings?.colors?.["general/background"] || "rgb(71, 72, 81)";
   let backgroundColorRoll = slotSettings?.colors?.["general/roll"] || "rgb(71, 72, 81)";
   let backgroundColorEncounter = slotSettings?.colors?.["general/encounter"] || "rgb(71, 72, 81)";

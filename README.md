@@ -40,9 +40,11 @@ You may need to extend the `safelist` of the [`tailwind.config.js`](https://gith
 "w-[75%]",
 "w-[10%]",
 "w-[15%]",
+"h-[20%]",
 "h-[75%]",
 "h-[30%]",
 "h-[65%]",
+"h-[90%]",
 "translate-x-[70%]",
 {
   pattern:

@@ -523,7 +523,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 		}
 
 		let buttonPanel = (
-			<span className="w-full h-[20%] flex flex-row justify-around items-center bg-gray-700/10 rounded-lg">
+			<span
+				className="w-full h-[20%] flex flex-row justify-around items-center bg-gray-300/10 rounded-lg"
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
+			>
 				{advantageButton}
 				{disadvantageButton}
 				{bonusButtons}
@@ -560,9 +565,22 @@ const renderComponent = (uuid, data, slotSettings) => {
 			statblocks.push(statblockButton);
 		}
 
+		let encounterTitle = (
+			<p className="py-2 text-xl">{foundEncounterName}</p>
+		);
+
+		if (slotSettings?.exclude?.includes(`${foundEncounterName}/title`)) {
+			encounterTitle = null;
+		}
+
 		let statblockList = (
-			<div className="w-full h-[75%] overflow-scroll bg-gray-700/10 rounded-lg">
-				<p className="py-2 text-xl">{foundEncounterName}</p>
+			<div
+				className="w-full h-[75%] overflow-scroll bg-gray-300/10 rounded-lg py-2"
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
+			>
+				{encounterTitle}
 				<ul className="flex flex-col items-center space-y-2">
 					{statblocks}
 				</ul>
@@ -574,12 +592,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 	// Building the Content for the Encounter-Pane
 	let encounterPane = (
-		<div
-			className="flex flex-col w-full h-full justify-between items-center"
-			onClick={(e) => {
-				e.stopPropagation();
-			}}
-		>
+		<div className="flex flex-col w-full h-full justify-between items-center">
 			{encounterElements}
 		</div>
 	);
@@ -775,15 +788,18 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				let member_element = (
 					<li
-						className="relative w-[90%] h-fit flex flex-row items-center justify-start py-4 rounded-md shadow-lg "
+						className="relative w-[90%] h-fit flex flex-row items-center justify-start py-1 rounded-md shadow-lg "
 						style={{ backgroundColor: member_color }}
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
 					>
 						<span className="flex flex-row w-[15%] flex items-center px-4 justify-between">
-							<div className="h-20 w-fit relative">
+							<div className="h-20 flex items-center w-fit relative">
 								<img
 									src={pm_icon}
 									alt={`Icon for Player ${party_member_name}`}
-									className="h-full object-contain"
+									className="h-[90%] object-contain"
 								/>
 								<code
 									className={`absolute bottom-0 right-0 translate-x-1/2 bg-gray-500 p-1 text-xs rounded-md`}
@@ -814,9 +830,15 @@ const renderComponent = (uuid, data, slotSettings) => {
 				memberElements.push(member_element);
 			}
 
+			let partyTitle = <p className="py-2 text-xl">{sourceName}</p>;
+
+			if (slotSettings?.exclude?.includes(`${sourceName}/title`)) {
+				partyTitle = null;
+			}
+
 			let partyElement = (
-				<div className="w-full h-fit py-4 bg-gray-700/10 rounded-lg">
-					<p className="py-2 text-xl">{sourceName}</p>
+				<div className="w-full h-fit py-4 bg-gray-300/10 rounded-lg">
+					{partyTitle}
 					<ul className="flex flex-col items-center space-y-2">
 						{memberElements}
 					</ul>
@@ -828,12 +850,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 	}
 
 	let partyPane = (
-		<div
-			className="flex flex-col w-full h-full overflow-scroll space-y-4 p-2 justify-around items-center"
-			onClick={(e) => {
-				e.stopPropagation();
-			}}
-		>
+		<div className="flex flex-col w-full h-full overflow-scroll space-y-4 p-2 justify-around items-center">
 			{partyElements}
 		</div>
 	);
