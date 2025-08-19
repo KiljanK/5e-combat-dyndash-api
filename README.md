@@ -14,17 +14,14 @@ The [express.js](https://expressjs.com) server scrapes information on [5e](https
 
 ## Screenshots
 
-The provided Component should be able to display Sources of the Data Type `digitalDice`, `5eParty`, and `5eEncounter`.
-
-The Component allows for the selection of an active statblock from a list of loaded statblocks (bottom left). It also enables the addition of situational bonuses, advantage, and disadvantage.
-
-It displays the result of the most recent roll(s) based on the selected statblock and other selected bonuses / settings (top left).
-
-Finally, it lists all party members with information on whether or not the result has hit their AC (right). It also allows for the selection of situational bonuses for the individual party members.
-
 ![Component_Screenshot](/resources/Example_Screenshot.png)
 
-I am strongly considering breaking up these three panes into separate Components for individual use, to allow for reordering them on the Dashboard, instead of confining them to this rigid structure (which kind of goes against the idea of flexible dashboarding).
+| Component Name    | Source Data Types                             | Purpose                                                                                                                                                                                                           |
+| ----------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Encounter Display | `5eEncounter`                                 | Shows all given encounters and gives buttons to control them                                                                                                                                                      |
+| Dice Roll Display | 1x `5eEncounter`, 1x `digitalDice`            | Takes the rolls of a dice and the contextual bonuses from an encounter to displays the total result                                                                                                                |
+| Party Display     | 1x `5eEncounter`, 1x `digitalDice`, `5eParty` | Takes the rolls of a dice and the contextual bonuses from an encounter. Displays which party members (from all given parties) would be hit by the total result. Also provides buttons to control the members' AC. |
+| Combat Display    | 1x `5eEncounter`, 1x `digitalDice`, `5eParty` | Combines all previous Components (shown in the image above).                                                                                                                                                      |
 
 ---
 
