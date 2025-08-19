@@ -321,16 +321,14 @@ const renderComponent = (uuid, data, slotSettings) => {
 		iconClasses = "animate-spin";
 	}
 
-	let displayNumberElement = <p className="text-lg">{displayNumber}</p>;
-
 	let rollIcon = (
 		<div className={`w-24 h-24 relative ${iconClasses}`}>
 			{diceIcon}
 			<p
-				className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+				className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg"
 				style={{ color: iconColor }}
 			>
-				{displayNumberElement}
+				{displayNumber}
 			</p>
 		</div>
 	);
@@ -454,12 +452,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 		};
 	};
 
-	let getButton = (text, classes, onClick) => {
+	let getButton = (text, classes, onClick, optionalKey = "") => {
 		return (
 			<button
 				className={`rounded-md ${classes} z-[2]`}
 				onClick={onClick}
-				key={text}
+				key={`${uuid}-${text}-${optionalKey}`}
 			>
 				{text}
 			</button>
@@ -481,7 +479,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 			encounter: foundEncounterName,
 			advantage: true,
 		});
-		let advantageButton = getButton("A", advantageClass, advantageClick);
+		let advantageButton = getButton(
+			"A",
+			advantageClass,
+			advantageClick,
+			"advantage-button"
+		);
 
 		let disadvantageClass = getToggleClass(e_meta?.["disadvantage"]);
 		let disadvantageClick = getOnClick(statblocksURL, {
@@ -491,7 +494,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 		let disadvantageButton = getButton(
 			"D",
 			disadvantageClass,
-			disadvantageClick
+			disadvantageClick,
+			"disadvantage-button"
 		);
 
 		// Bonus Buttons, these work very similarly to the Advantage and Disadvantage ones
@@ -511,7 +515,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 				let bonusButton = getButton(
 					`${bonusValue}`,
 					buttonClass,
-					buttonClick
+					buttonClick,
+					`statblock-bonus-${i}`
 				);
 				bonusButtons.push(bonusButton);
 			}
@@ -549,7 +554,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 					<p className="opacity-50">{bonusString}</p>,
 				],
 				buttonClass,
-				buttonClick
+				buttonClick,
+				`statblock-${statblock}`
 			);
 			statblocks.push(statblockButton);
 		}
@@ -685,7 +691,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 						let bonusButton = getButton(
 							bonusString,
 							buttonClass,
-							buttonClick
+							buttonClick,
+							`regular-bonus-${party_member_name}-index-${i}`
 						);
 
 						member_buttons.push(bonusButton);
@@ -716,7 +723,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 						let bonusButton = getButton(
 							bonusString,
 							buttonClass,
-							buttonClick
+							buttonClick,
+							`custom-bonus-${party_member_name}-index-${i}`
 						);
 
 						member_buttons.push(bonusButton);
@@ -746,7 +754,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 					forward(e);
 				};
 
-				let bonusButton = getButton(`+X`, buttonClass, buttonClick);
+				let bonusButton = getButton(
+					`+X`,
+					buttonClass,
+					buttonClick,
+					`x-bonus-${party_member_name}`
+				);
 
 				member_buttons.push(bonusButton);
 

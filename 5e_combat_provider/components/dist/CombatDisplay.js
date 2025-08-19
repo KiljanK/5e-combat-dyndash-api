@@ -199,14 +199,13 @@ var renderComponent = (uuid, data, slotSettings) => {
     displayNumber = foundDice?.info?.face;
     iconClasses = "animate-spin";
   }
-  let displayNumberElement = /* @__PURE__ */ React.createElement("p", { className: "text-lg" }, displayNumber);
   let rollIcon = /* @__PURE__ */ React.createElement("div", { className: `w-24 h-24 relative ${iconClasses}` }, diceIcon, /* @__PURE__ */ React.createElement(
     "p",
     {
-      className: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
+      className: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg",
       style: { color: iconColor }
     },
-    displayNumberElement
+    displayNumber
   ));
   let resultAddends = [];
   if (foundDice) {
@@ -279,13 +278,13 @@ var renderComponent = (uuid, data, slotSettings) => {
       }
     };
   };
-  let getButton = (text, classes, onClick) => {
+  let getButton = (text, classes, onClick, optionalKey = "") => {
     return /* @__PURE__ */ React.createElement(
       "button",
       {
         className: `rounded-md ${classes} z-[2]`,
         onClick,
-        key: text
+        key: `${uuid}-${text}-${optionalKey}`
       },
       text
     );
@@ -301,7 +300,12 @@ var renderComponent = (uuid, data, slotSettings) => {
       encounter: foundEncounterName,
       advantage: true
     });
-    let advantageButton = getButton("A", advantageClass, advantageClick);
+    let advantageButton = getButton(
+      "A",
+      advantageClass,
+      advantageClick,
+      "advantage-button"
+    );
     let disadvantageClass = getToggleClass(e_meta?.["disadvantage"]);
     let disadvantageClick = getOnClick(statblocksURL, {
       encounter: foundEncounterName,
@@ -310,7 +314,8 @@ var renderComponent = (uuid, data, slotSettings) => {
     let disadvantageButton = getButton(
       "D",
       disadvantageClass,
-      disadvantageClick
+      disadvantageClick,
+      "disadvantage-button"
     );
     let bonusButtons = [];
     if (available_bonuses?.length > 0) {
@@ -325,7 +330,8 @@ var renderComponent = (uuid, data, slotSettings) => {
         let bonusButton = getButton(
           `${bonusValue}`,
           buttonClass,
-          buttonClick
+          buttonClick,
+          `statblock-bonus-${i}`
         );
         bonusButtons.push(bonusButton);
       }
@@ -348,7 +354,8 @@ var renderComponent = (uuid, data, slotSettings) => {
           /* @__PURE__ */ React.createElement("p", { className: "opacity-50" }, bonusString)
         ],
         buttonClass,
-        buttonClick
+        buttonClick,
+        `statblock-${statblock}`
       );
       statblocks.push(statblockButton);
     }
@@ -430,7 +437,8 @@ var renderComponent = (uuid, data, slotSettings) => {
             let bonusButton2 = getButton(
               bonusString,
               buttonClass2,
-              buttonClick2
+              buttonClick2,
+              `regular-bonus-${party_member_name}-index-${i}`
             );
             member_buttons.push(bonusButton2);
           }
@@ -452,7 +460,8 @@ var renderComponent = (uuid, data, slotSettings) => {
             let bonusButton2 = getButton(
               bonusString,
               buttonClass2,
-              buttonClick2
+              buttonClick2,
+              `custom-bonus-${party_member_name}-index-${i}`
             );
             member_buttons.push(bonusButton2);
           }
@@ -475,7 +484,12 @@ var renderComponent = (uuid, data, slotSettings) => {
           });
           forward(e);
         };
-        let bonusButton = getButton(`+X`, buttonClass, buttonClick);
+        let bonusButton = getButton(
+          `+X`,
+          buttonClass,
+          buttonClick,
+          `x-bonus-${party_member_name}`
+        );
         member_buttons.push(bonusButton);
         for (let pm_external_bonus of pm_external_bonuses_names) {
           let value = pm_external_bonuses[pm_external_bonus];
