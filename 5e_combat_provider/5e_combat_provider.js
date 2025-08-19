@@ -572,6 +572,8 @@ app.post("/party/toggle/", (req, res) => {
 			external_bonuses[name] = value;
 		} else if (action === "delete" && name !== undefined) {
 			delete external_bonuses[name];
+		} else if (action === "delete_all") {
+			external_bonuses = {};
 		}
 
 		data[req?.body?.party]["5eParty"][req?.body?.player][
