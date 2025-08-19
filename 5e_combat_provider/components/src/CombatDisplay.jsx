@@ -19,7 +19,7 @@
 
 // region Component Information
 
-const componentName = "CombatDisplay";
+const componentName = "Combat Display";
 
 const acceptedDataTypes = [["digitalDice*", "5eEncounter*", "5eParty"]];
 
@@ -441,12 +441,12 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				if (!response.ok) {
 					console.log(
-						`CombatDisplay Component received an error response!`
+						`Combat Display Component received an error response!`
 					);
 				}
 			} catch {
 				console.log(
-					`CombatDisplay Component failed to get a response!`
+					`Combat Display Component failed to get a response!`
 				);
 			}
 		};
@@ -676,13 +676,22 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 				let isHitBy = finalRollResult - finalAC;
 
+				let isHit = isHitBy >= 0;
+
+				if (chosenRoll === 1) {
+					isHit = false;
+				} else if (chosenRoll === 20) {
+					isHit = true;
+				}
+
 				let customHitColor =
 					slotSettings?.colors?.[
 						`${sourceName}/${party_member_name}`
 					] || hitColor;
 
-				let member_color =
-					isHitBy >= 0 ? customHitColor : "rgba(66, 66, 66, 0.33)";
+				let member_color = isHit
+					? customHitColor
+					: "rgba(66, 66, 66, 0.33)";
 
 				let member_buttons = [];
 				let member_externals = [];
@@ -814,7 +823,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 							{member_externals}
 							{member_buttons}
 						</ul>
-						{isHitBy > 0 ? (
+						{isHit && isHitBy > 0 ? (
 							<p
 								className="absolute text-xs px-2 py-1 top-1/2 right-0 translate-x-[70%] -translate-y-1/2 rounded-r-full z-[1]"
 								style={{

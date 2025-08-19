@@ -1,5 +1,5 @@
 // component_compiler/src/CombatDisplay.jsx
-var componentName = "CombatDisplay";
+var componentName = "Combat Display";
 var acceptedDataTypes = [["digitalDice*", "5eEncounter*", "5eParty"]];
 var componentInformation = "source-based encounter overview";
 var componentExplanation = /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement("p", null, "This is a DynDash Component that takes in Sources of the following Data Types:"), /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("ul", { className: "space-x-1 space-y-4 text-sm flex flex-col bg-gray-600 text-white p-2 rounded-md overflow-auto" }, /* @__PURE__ */ React.createElement("li", null, /* @__PURE__ */ React.createElement("code", { className: "bg-gray-900/50 px-2 py-1 mr-1 rounded-lg" }, "digitalDice"), "The Component will only respect one Source of this type and only use one of the dice stored within, so exlude all but one of the Sources and dice, if you want control over which one is used. Otherwise, the first Source and its first dice is used."), /* @__PURE__ */ React.createElement("li", null, /* @__PURE__ */ React.createElement("code", { className: "bg-gray-900/50 px-2 py-1 mr-1 rounded-lg" }, "5eEncounter"), "The Component will only respect one Source of this type, so exlude all but one of the Sources, if you want control over which one is used. Otherwise, the first Source is used."), /* @__PURE__ */ React.createElement("li", null, /* @__PURE__ */ React.createElement("code", { className: "bg-gray-900/50 px-2 py-1 mr-1 rounded-lg" }, "5eParty"), "No Limitations")), /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("p", null, "It is possible to hide the titles by adding the following key to the exclude array:"), /* @__PURE__ */ React.createElement("div", { className: "space-x-1 text-sm flex flex-row bg-gray-600 text-white p-2 rounded-md overflow-auto" }, /* @__PURE__ */ React.createElement("span", { className: "bg-gray-900/50 px-2 rounded-lg" }, "SOURCENAME/title")));
@@ -268,12 +268,12 @@ var renderComponent = (uuid, data, slotSettings) => {
         const response = await fetch(requestURL, requestObject);
         if (!response.ok) {
           console.log(
-            `CombatDisplay Component received an error response!`
+            `Combat Display Component received an error response!`
           );
         }
       } catch {
         console.log(
-          `CombatDisplay Component failed to get a response!`
+          `Combat Display Component failed to get a response!`
         );
       }
     };
@@ -435,8 +435,14 @@ var renderComponent = (uuid, data, slotSettings) => {
           0
         );
         let isHitBy = finalRollResult - finalAC;
+        let isHit = isHitBy >= 0;
+        if (chosenRoll === 1) {
+          isHit = false;
+        } else if (chosenRoll === 20) {
+          isHit = true;
+        }
         let customHitColor = slotSettings?.colors?.[`${sourceName}/${party_member_name}`] || hitColor;
-        let member_color = isHitBy >= 0 ? customHitColor : "rgba(66, 66, 66, 0.33)";
+        let member_color = isHit ? customHitColor : "rgba(66, 66, 66, 0.33)";
         let member_buttons = [];
         let member_externals = [];
         if (pm_bonuses.length > 0) {
@@ -538,7 +544,7 @@ var renderComponent = (uuid, data, slotSettings) => {
           ))),
           /* @__PURE__ */ React.createElement("p", { className: "w-[10%] text-left" }, party_member_name),
           /* @__PURE__ */ React.createElement("ul", { className: "w-[75%] flex flex-wrap px-6 py-2 justify-end space-x-2" }, member_externals, member_buttons),
-          isHitBy > 0 ? /* @__PURE__ */ React.createElement(
+          isHit && isHitBy > 0 ? /* @__PURE__ */ React.createElement(
             "p",
             {
               className: "absolute text-xs px-2 py-1 top-1/2 right-0 translate-x-[70%] -translate-y-1/2 rounded-r-full z-[1]",
