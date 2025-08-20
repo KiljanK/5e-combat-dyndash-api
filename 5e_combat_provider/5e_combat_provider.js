@@ -222,6 +222,7 @@ let readEncounters = async (encounter_paths) => {
 					"active-statblock": undefined,
 					bonuses: config["standard-bonuses"],
 					"active-bonuses-indices": [],
+					"active-custom-bonuses": [],
 					advantage: false,
 					disadvantage: false,
 					toggle: "http://localhost:4453/encounter/toggle/",
@@ -598,6 +599,7 @@ app.post("/encounter/load", (req, res) => {
 
 app.post("/encounter/toggle/", (req, res) => {
 	let bonus_index = req?.body?.bonus_index;
+	let custom_bonus_object = req?.body?.custom_bonus_object;
 	let advantage = req?.body?.advantage;
 	let disadvantage = req?.body?.disadvantage;
 	let active_statblock = req?.body?.active_statblock;
@@ -618,6 +620,31 @@ app.post("/encounter/toggle/", (req, res) => {
 		data[req?.body?.encounter]["5eEncounter"]["_meta"][
 			"active-bonuses-indices"
 		] = active_bonuses_i;
+	}
+
+	// If it's about creating or deleting the party member's custom bonuses
+	if (custom_bonus_object !== undefined) {
+		let { action, index, value } = custom_bonus_object;
+
+		let active_custom_bonuses =
+			data[req?.body?.encounter]["5eEncounter"]["_meta"][
+				"active-custom-bonuses"
+			];
+
+		// This might cause issues when multiple people quickly call this
+		// repeatedly while their Component's data is out of sync
+
+		if (action === "create" && value !== undefined) {
+			active_custom_bonuses.push(value);
+		} else if (action === "delete" && index !== undefined) {
+			if (index <= active_custom_bonuses?.length - 1) {
+				active_custom_bonuses.splice(index, 1);
+			}
+		}
+
+		data[req?.body?.encounter]["5eEncounter"]["_meta"][
+			"active-custom-bonuses"
+		] = active_custom_bonuses;
 	}
 
 	// If it's about toggling the encounter's advantage

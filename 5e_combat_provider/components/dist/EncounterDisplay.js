@@ -41,10 +41,10 @@ var renderComponent = (uuid, data, slotSettings) => {
     for (let propertyName in data[sourceName]) {
       if (!propertyName.includes("5eEncounter")) continue;
       let currentEncounter = data[sourceName][propertyName];
-      let encounterElements = [];
       let e_meta = currentEncounter?.["_meta"];
       let available_bonuses = e_meta?.["bonuses"];
       let active_bonuses_i = e_meta?.["active-bonuses-indices"];
+      let active_custom_bonuses_values = e_meta?.["active-custom-bonuses"] || [];
       let active_statblock = e_meta?.["active-statblock"];
       let advantage = e_meta?.["advantage"];
       let disadvantage = e_meta?.["disadvantage"];
@@ -134,36 +134,82 @@ var renderComponent = (uuid, data, slotSettings) => {
         disadvantageClick,
         "disadvantage-button"
       );
-      let bonusButtons = [];
+      let encounter_buttons = [];
       if (available_bonuses?.length > 0) {
         for (let i = 0; i < available_bonuses?.length; i++) {
           let bonusValue = available_bonuses[i];
           let isActive = active_bonuses_i?.includes(i);
-          let buttonClass = getToggleClass(isActive);
-          let buttonClick = getOnClick(statblocksURL, {
+          let buttonClass2 = getToggleClass(isActive);
+          let buttonClick2 = getOnClick(statblocksURL, {
             encounter: sourceName,
             bonus_index: i
           });
-          let bonusButton = getButton(
+          let bonusButton2 = getButton(
             `${bonusValue}`,
-            buttonClass,
-            buttonClick,
+            buttonClass2,
+            buttonClick2,
             `statblock-bonus-${i}`
           );
-          bonusButtons.push(bonusButton);
+          encounter_buttons.push(bonusButton2);
         }
       }
+      if (active_custom_bonuses_values.length > 0) {
+        for (let i = 0; i < active_custom_bonuses_values.length; i++) {
+          let bonusValue = active_custom_bonuses_values[i];
+          let isActive = true;
+          let bonusString = getBonusString(bonusValue);
+          let buttonClass2 = getToggleClass(isActive);
+          let buttonClick2 = getOnClick(statblocksURL, {
+            encounter: sourceName,
+            custom_bonus_object: {
+              action: "delete",
+              index: i
+            }
+          });
+          let bonusButton2 = getButton(
+            bonusString,
+            buttonClass2,
+            buttonClick2,
+            `custom-bonus-${sourceName}-index-${i}`
+          );
+          encounter_buttons.push(bonusButton2);
+        }
+      }
+      let buttonClass = getToggleClass(false);
+      let buttonClick = async (e) => {
+        e.stopPropagation();
+        let input = prompt("Enter a custom attack-bonus value:", 0);
+        let bonus = Number(input);
+        if (!bonus) {
+          return;
+        }
+        let forward = getOnClick(statblocksURL, {
+          encounter: sourceName,
+          custom_bonus_object: {
+            action: "create",
+            value: bonus
+          }
+        });
+        forward(e);
+      };
+      let bonusButton = getButton(
+        `+X`,
+        buttonClass,
+        buttonClick,
+        `x-bonus-${sourceName}`
+      );
+      encounter_buttons.push(bonusButton);
       let buttonPanel = /* @__PURE__ */ React.createElement(
         "span",
         {
-          className: "w-full h-fit py-2 flex flex-row justify-around items-center bg-gray-300/10 rounded-lg",
+          className: "w-full h-fit p-2 flex flex-row flex-wrap space-x-2 space-y-2 justify-around items-center bg-gray-300/10 rounded-lg",
           onClick: (e) => {
             e.stopPropagation();
           }
         },
         advantageButton,
         disadvantageButton,
-        bonusButtons
+        encounter_buttons
       );
       let statblocks = [];
       for (let statblock of Object.keys(currentEncounter)) {
@@ -175,8 +221,8 @@ var renderComponent = (uuid, data, slotSettings) => {
         let attack_bonus = currentEncounter[statblock]?.["attack-bonus"];
         let bonusString = getBonusString(attack_bonus);
         let isActive = statblock === active_statblock;
-        let buttonClass = getStatblockClass(isActive);
-        let buttonClick = getOnClick(statblocksURL, {
+        let buttonClass2 = getStatblockClass(isActive);
+        let buttonClick2 = getOnClick(statblocksURL, {
           encounter: sourceName,
           active_statblock: statblock
         });
@@ -185,8 +231,8 @@ var renderComponent = (uuid, data, slotSettings) => {
             /* @__PURE__ */ React.createElement("p", null, statblock),
             /* @__PURE__ */ React.createElement("p", { className: "opacity-50" }, bonusString)
           ],
-          buttonClass,
-          buttonClick,
+          buttonClass2,
+          buttonClick2,
           `statblock-${statblock}`
         );
         statblocks.push(statblockButton);

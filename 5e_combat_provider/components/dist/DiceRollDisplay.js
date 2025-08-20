@@ -90,6 +90,7 @@ var renderComponent = (uuid, data, slotSettings) => {
   let available_bonuses = e_meta?.["bonuses"];
   let active_bonuses_i = e_meta?.["active-bonuses-indices"];
   let e_bonuses = active_bonuses_i?.map((index) => available_bonuses[index]) || [];
+  let active_custom_bonuses_values = e_meta?.["active-custom-bonuses"] || [];
   let active_statblock = e_meta?.["active-statblock"];
   let statblock_bonus = active_statblock ? foundEncounter[active_statblock]?.["attack-bonus"] : 0;
   let advantage = e_meta?.["advantage"];
@@ -161,8 +162,9 @@ var renderComponent = (uuid, data, slotSettings) => {
     }
   }
   let finalRollResult = 0;
+  let encounter_bonuses = e_bonuses.concat(active_custom_bonuses_values);
   finalRollResult += chosenRoll;
-  finalRollResult += e_bonuses.reduce((accumulator, currentValue) => {
+  finalRollResult += encounter_bonuses.reduce((accumulator, currentValue) => {
     return Number(accumulator) + Number(currentValue);
   }, 0);
   finalRollResult += statblock_bonus;
@@ -201,8 +203,8 @@ var renderComponent = (uuid, data, slotSettings) => {
       /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, shownRolls), /* @__PURE__ */ React.createElement("p", null, foundDice["info"]["name"]))
     );
   }
-  if (e_bonuses) {
-    for (let e_bonus of e_bonuses) {
+  if (encounter_bonuses) {
+    for (let e_bonus of encounter_bonuses) {
       let bonusString = getBonusString(e_bonus);
       let e_bonus_element = /* @__PURE__ */ React.createElement(
         "code",
@@ -223,7 +225,7 @@ var renderComponent = (uuid, data, slotSettings) => {
       /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, statblock_bonus_element), /* @__PURE__ */ React.createElement("p", null, active_statblock))
     );
   }
-  let rollPane = /* @__PURE__ */ React.createElement("div", { className: "w-full h-full flex flex-col space-y-2 justify-center items-center" }, rollIcon, /* @__PURE__ */ React.createElement("span", { className: "flex space-x-2" }, resultAddends));
+  let rollPane = /* @__PURE__ */ React.createElement("div", { className: "w-full h-full flex flex-col space-y-2 justify-center items-center" }, rollIcon, /* @__PURE__ */ React.createElement("span", { className: "flex space-x-2 w-full justify-center py-2 overflow-y-scroll" }, resultAddends));
   let backgroundColor = slotSettings?.colors?.["general/background"] || "rgb(71, 72, 81)";
   return /* @__PURE__ */ React.createElement(
     "div",

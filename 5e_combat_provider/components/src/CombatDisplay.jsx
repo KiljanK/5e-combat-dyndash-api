@@ -208,6 +208,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 	let active_bonuses_i = e_meta?.["active-bonuses-indices"];
 	let e_bonuses =
 		active_bonuses_i?.map((index) => available_bonuses[index]) || [];
+	let active_custom_bonuses_values = e_meta?.["active-custom-bonuses"] || [];
 	let active_statblock = e_meta?.["active-statblock"];
 	let statblock_bonus = active_statblock
 		? foundEncounter[active_statblock]?.["attack-bonus"]
@@ -288,8 +289,10 @@ const renderComponent = (uuid, data, slotSettings) => {
 	// Doing the final result calculations
 	let finalRollResult = 0;
 
+	let encounter_bonuses = e_bonuses.concat(active_custom_bonuses_values);
+
 	finalRollResult += chosenRoll;
-	finalRollResult += e_bonuses.reduce((accumulator, currentValue) => {
+	finalRollResult += encounter_bonuses.reduce((accumulator, currentValue) => {
 		return Number(accumulator) + Number(currentValue);
 	}, 0);
 	finalRollResult += statblock_bonus;
@@ -350,8 +353,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 	}
 
 	// Bonus-Based Addends
-	if (e_bonuses) {
-		for (let e_bonus of e_bonuses) {
+	if (encounter_bonuses) {
+		for (let e_bonus of encounter_bonuses) {
 			let bonusString = getBonusString(e_bonus);
 
 			let e_bonus_element = (
@@ -389,7 +392,9 @@ const renderComponent = (uuid, data, slotSettings) => {
 	let rollPane = (
 		<div className="w-full h-full flex flex-col space-y-2 justify-center items-center">
 			{rollIcon}
-			<span className="flex space-x-2">{resultAddends}</span>
+			<span className="flex space-x-2 w-full justify-center py-2 overflow-y-scroll">
+				{resultAddends}
+			</span>
 		</div>
 	);
 
@@ -500,7 +505,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 		);
 
 		// Bonus Buttons, these work very similarly to the Advantage and Disadvantage ones
-		let bonusButtons = [];
+		let encounter_buttons = [];
 
 		if (available_bonuses?.length > 0) {
 			for (let i = 0; i < available_bonuses?.length; i++) {
@@ -519,20 +524,78 @@ const renderComponent = (uuid, data, slotSettings) => {
 					buttonClick,
 					`statblock-bonus-${i}`
 				);
-				bonusButtons.push(bonusButton);
+				encounter_buttons.push(bonusButton);
 			}
 		}
 
+		// Adding removal-buttons for custom bonuses
+		if (active_custom_bonuses_values.length > 0) {
+			for (let i = 0; i < active_custom_bonuses_values.length; i++) {
+				let bonusValue = active_custom_bonuses_values[i];
+				let isActive = true;
+				let bonusString = getBonusString(bonusValue);
+
+				let buttonClass = getToggleClass(isActive);
+				let buttonClick = getOnClick(statblocksURL, {
+					encounter: foundEncounterName,
+					custom_bonus_object: {
+						action: "delete",
+						index: i,
+					},
+				});
+
+				let bonusButton = getButton(
+					bonusString,
+					buttonClass,
+					buttonClick,
+					`custom-bonus-${foundEncounterName}-index-${i}`
+				);
+
+				encounter_buttons.push(bonusButton);
+			}
+		}
+
+		// Adding a singular creation button for all custom Bonuses
+		let buttonClass = getToggleClass(false);
+		let buttonClick = async (e) => {
+			e.stopPropagation();
+
+			let input = prompt("Enter a custom attack-bonus value:", 0);
+			let bonus = Number(input);
+			if (!bonus) {
+				return;
+			}
+
+			let forward = getOnClick(statblocksURL, {
+				encounter: foundEncounterName,
+				custom_bonus_object: {
+					action: "create",
+					value: bonus,
+				},
+			});
+
+			forward(e);
+		};
+
+		let bonusButton = getButton(
+			`+X`,
+			buttonClass,
+			buttonClick,
+			`x-bonus-${foundEncounterName}`
+		);
+
+		encounter_buttons.push(bonusButton);
+
 		let buttonPanel = (
 			<span
-				className="w-full h-[20%] flex flex-row justify-around items-center bg-gray-300/10 rounded-lg"
+				className="w-full h-fit flex flex-row flex-wrap p-2 space-x-2 space-y-2 justify-around items-center bg-gray-300/10 rounded-lg"
 				onClick={(e) => {
 					e.stopPropagation();
 				}}
 			>
 				{advantageButton}
 				{disadvantageButton}
-				{bonusButtons}
+				{encounter_buttons}
 			</span>
 		);
 
@@ -581,7 +644,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 		let statblockList = (
 			<div
-				className="w-full h-[75%] overflow-scroll bg-gray-300/10 rounded-lg py-2"
+				className="w-full h-fit bg-gray-300/10 rounded-lg py-2"
 				onClick={(e) => {
 					e.stopPropagation();
 				}}
@@ -598,7 +661,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 
 	// Building the Content for the Encounter-Pane
 	let encounterPane = (
-		<div className="flex flex-col w-full h-full justify-between items-center">
+		<div className="flex flex-col w-full h-fit space-y-2 justify-between items-center">
 			{encounterElements}
 		</div>
 	);
@@ -900,7 +963,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 					{rollPane}
 				</div>
 				<div
-					className="w-full h-[65%] rounded-md p-2"
+					className="w-full h-[65%] overflow-scroll rounded-md p-2"
 					style={{
 						backgroundColor: backgroundColorEncounter,
 					}}

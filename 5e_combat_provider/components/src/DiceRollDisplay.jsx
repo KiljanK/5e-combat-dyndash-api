@@ -189,6 +189,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 	let active_bonuses_i = e_meta?.["active-bonuses-indices"];
 	let e_bonuses =
 		active_bonuses_i?.map((index) => available_bonuses[index]) || [];
+	let active_custom_bonuses_values = e_meta?.["active-custom-bonuses"] || [];
 	let active_statblock = e_meta?.["active-statblock"];
 	let statblock_bonus = active_statblock
 		? foundEncounter[active_statblock]?.["attack-bonus"]
@@ -269,8 +270,10 @@ const renderComponent = (uuid, data, slotSettings) => {
 	// Doing the final result calculations
 	let finalRollResult = 0;
 
+	let encounter_bonuses = e_bonuses.concat(active_custom_bonuses_values);
+
 	finalRollResult += chosenRoll;
-	finalRollResult += e_bonuses.reduce((accumulator, currentValue) => {
+	finalRollResult += encounter_bonuses.reduce((accumulator, currentValue) => {
 		return Number(accumulator) + Number(currentValue);
 	}, 0);
 	finalRollResult += statblock_bonus;
@@ -331,8 +334,8 @@ const renderComponent = (uuid, data, slotSettings) => {
 	}
 
 	// Bonus-Based Addends
-	if (e_bonuses) {
-		for (let e_bonus of e_bonuses) {
+	if (encounter_bonuses) {
+		for (let e_bonus of encounter_bonuses) {
 			let bonusString = getBonusString(e_bonus);
 
 			let e_bonus_element = (
@@ -370,7 +373,9 @@ const renderComponent = (uuid, data, slotSettings) => {
 	let rollPane = (
 		<div className="w-full h-full flex flex-col space-y-2 justify-center items-center">
 			{rollIcon}
-			<span className="flex space-x-2">{resultAddends}</span>
+			<span className="flex space-x-2 w-full justify-center py-2 overflow-y-scroll">
+				{resultAddends}
+			</span>
 		</div>
 	);
 

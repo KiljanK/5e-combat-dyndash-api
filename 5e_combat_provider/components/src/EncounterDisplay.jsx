@@ -93,12 +93,13 @@ const renderComponent = (uuid, data, slotSettings) => {
 			if (!propertyName.includes("5eEncounter")) continue;
 
 			let currentEncounter = data[sourceName][propertyName];
-			let encounterElements = [];
 
 			// Getting base information from the digitalDice rolls and 5eEncounter information
 			let e_meta = currentEncounter?.["_meta"];
 			let available_bonuses = e_meta?.["bonuses"];
 			let active_bonuses_i = e_meta?.["active-bonuses-indices"];
+			let active_custom_bonuses_values =
+				e_meta?.["active-custom-bonuses"] || [];
 			let active_statblock = e_meta?.["active-statblock"];
 			let advantage = e_meta?.["advantage"];
 			let disadvantage = e_meta?.["disadvantage"];
@@ -217,7 +218,7 @@ const renderComponent = (uuid, data, slotSettings) => {
 			);
 
 			// Bonus Buttons, these work very similarly to the Advantage and Disadvantage ones
-			let bonusButtons = [];
+			let encounter_buttons = [];
 
 			if (available_bonuses?.length > 0) {
 				for (let i = 0; i < available_bonuses?.length; i++) {
@@ -236,20 +237,78 @@ const renderComponent = (uuid, data, slotSettings) => {
 						buttonClick,
 						`statblock-bonus-${i}`
 					);
-					bonusButtons.push(bonusButton);
+					encounter_buttons.push(bonusButton);
 				}
 			}
 
+			// Adding removal-buttons for custom bonuses
+			if (active_custom_bonuses_values.length > 0) {
+				for (let i = 0; i < active_custom_bonuses_values.length; i++) {
+					let bonusValue = active_custom_bonuses_values[i];
+					let isActive = true;
+					let bonusString = getBonusString(bonusValue);
+
+					let buttonClass = getToggleClass(isActive);
+					let buttonClick = getOnClick(statblocksURL, {
+						encounter: sourceName,
+						custom_bonus_object: {
+							action: "delete",
+							index: i,
+						},
+					});
+
+					let bonusButton = getButton(
+						bonusString,
+						buttonClass,
+						buttonClick,
+						`custom-bonus-${sourceName}-index-${i}`
+					);
+
+					encounter_buttons.push(bonusButton);
+				}
+			}
+
+			// Adding a singular creation button for all custom Bonuses
+			let buttonClass = getToggleClass(false);
+			let buttonClick = async (e) => {
+				e.stopPropagation();
+
+				let input = prompt("Enter a custom attack-bonus value:", 0);
+				let bonus = Number(input);
+				if (!bonus) {
+					return;
+				}
+
+				let forward = getOnClick(statblocksURL, {
+					encounter: sourceName,
+					custom_bonus_object: {
+						action: "create",
+						value: bonus,
+					},
+				});
+
+				forward(e);
+			};
+
+			let bonusButton = getButton(
+				`+X`,
+				buttonClass,
+				buttonClick,
+				`x-bonus-${sourceName}`
+			);
+
+			encounter_buttons.push(bonusButton);
+
 			let buttonPanel = (
 				<span
-					className="w-full h-fit py-2 flex flex-row justify-around items-center bg-gray-300/10 rounded-lg"
+					className="w-full h-fit p-2 flex flex-row flex-wrap space-x-2 space-y-2 justify-around items-center bg-gray-300/10 rounded-lg"
 					onClick={(e) => {
 						e.stopPropagation();
 					}}
 				>
 					{advantageButton}
 					{disadvantageButton}
-					{bonusButtons}
+					{encounter_buttons}
 				</span>
 			);
 

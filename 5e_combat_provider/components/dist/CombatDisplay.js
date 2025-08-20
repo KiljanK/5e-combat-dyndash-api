@@ -102,6 +102,7 @@ var renderComponent = (uuid, data, slotSettings) => {
   let available_bonuses = e_meta?.["bonuses"];
   let active_bonuses_i = e_meta?.["active-bonuses-indices"];
   let e_bonuses = active_bonuses_i?.map((index) => available_bonuses[index]) || [];
+  let active_custom_bonuses_values = e_meta?.["active-custom-bonuses"] || [];
   let active_statblock = e_meta?.["active-statblock"];
   let statblock_bonus = active_statblock ? foundEncounter[active_statblock]?.["attack-bonus"] : 0;
   let advantage = e_meta?.["advantage"];
@@ -173,8 +174,9 @@ var renderComponent = (uuid, data, slotSettings) => {
     }
   }
   let finalRollResult = 0;
+  let encounter_bonuses = e_bonuses.concat(active_custom_bonuses_values);
   finalRollResult += chosenRoll;
-  finalRollResult += e_bonuses.reduce((accumulator, currentValue) => {
+  finalRollResult += encounter_bonuses.reduce((accumulator, currentValue) => {
     return Number(accumulator) + Number(currentValue);
   }, 0);
   finalRollResult += statblock_bonus;
@@ -213,8 +215,8 @@ var renderComponent = (uuid, data, slotSettings) => {
       /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, shownRolls), /* @__PURE__ */ React.createElement("p", null, foundDice["info"]["name"]))
     );
   }
-  if (e_bonuses) {
-    for (let e_bonus of e_bonuses) {
+  if (encounter_bonuses) {
+    for (let e_bonus of encounter_bonuses) {
       let bonusString = getBonusString(e_bonus);
       let e_bonus_element = /* @__PURE__ */ React.createElement(
         "code",
@@ -235,7 +237,7 @@ var renderComponent = (uuid, data, slotSettings) => {
       /* @__PURE__ */ React.createElement("div", { className: "flex flex-col justify-end text-xs" }, /* @__PURE__ */ React.createElement("span", { className: "space-x-1" }, statblock_bonus_element), /* @__PURE__ */ React.createElement("p", null, active_statblock))
     );
   }
-  let rollPane = /* @__PURE__ */ React.createElement("div", { className: "w-full h-full flex flex-col space-y-2 justify-center items-center" }, rollIcon, /* @__PURE__ */ React.createElement("span", { className: "flex space-x-2" }, resultAddends));
+  let rollPane = /* @__PURE__ */ React.createElement("div", { className: "w-full h-full flex flex-col space-y-2 justify-center items-center" }, rollIcon, /* @__PURE__ */ React.createElement("span", { className: "flex space-x-2 w-full justify-center py-2 overflow-y-scroll" }, resultAddends));
   let statblocksURL = e_meta?.toggle;
   let baseButtonClasses = "px-4 text-white rounded-md transition duration-300 shadow-md hover:shadow-gray-500/50 hover:ring-2 hover:ring-gray-400";
   let toggleButtonClasses = "w-fit h-fit py-2";
@@ -317,36 +319,82 @@ var renderComponent = (uuid, data, slotSettings) => {
       disadvantageClick,
       "disadvantage-button"
     );
-    let bonusButtons = [];
+    let encounter_buttons = [];
     if (available_bonuses?.length > 0) {
       for (let i = 0; i < available_bonuses?.length; i++) {
         let bonusValue = available_bonuses[i];
         let isActive = active_bonuses_i?.includes(i);
-        let buttonClass = getToggleClass(isActive);
-        let buttonClick = getOnClick(statblocksURL, {
+        let buttonClass2 = getToggleClass(isActive);
+        let buttonClick2 = getOnClick(statblocksURL, {
           encounter: foundEncounterName,
           bonus_index: i
         });
-        let bonusButton = getButton(
+        let bonusButton2 = getButton(
           `${bonusValue}`,
-          buttonClass,
-          buttonClick,
+          buttonClass2,
+          buttonClick2,
           `statblock-bonus-${i}`
         );
-        bonusButtons.push(bonusButton);
+        encounter_buttons.push(bonusButton2);
       }
     }
+    if (active_custom_bonuses_values.length > 0) {
+      for (let i = 0; i < active_custom_bonuses_values.length; i++) {
+        let bonusValue = active_custom_bonuses_values[i];
+        let isActive = true;
+        let bonusString = getBonusString(bonusValue);
+        let buttonClass2 = getToggleClass(isActive);
+        let buttonClick2 = getOnClick(statblocksURL, {
+          encounter: foundEncounterName,
+          custom_bonus_object: {
+            action: "delete",
+            index: i
+          }
+        });
+        let bonusButton2 = getButton(
+          bonusString,
+          buttonClass2,
+          buttonClick2,
+          `custom-bonus-${foundEncounterName}-index-${i}`
+        );
+        encounter_buttons.push(bonusButton2);
+      }
+    }
+    let buttonClass = getToggleClass(false);
+    let buttonClick = async (e) => {
+      e.stopPropagation();
+      let input = prompt("Enter a custom attack-bonus value:", 0);
+      let bonus = Number(input);
+      if (!bonus) {
+        return;
+      }
+      let forward = getOnClick(statblocksURL, {
+        encounter: foundEncounterName,
+        custom_bonus_object: {
+          action: "create",
+          value: bonus
+        }
+      });
+      forward(e);
+    };
+    let bonusButton = getButton(
+      `+X`,
+      buttonClass,
+      buttonClick,
+      `x-bonus-${foundEncounterName}`
+    );
+    encounter_buttons.push(bonusButton);
     let buttonPanel = /* @__PURE__ */ React.createElement(
       "span",
       {
-        className: "w-full h-[20%] flex flex-row justify-around items-center bg-gray-300/10 rounded-lg",
+        className: "w-full h-fit flex flex-row flex-wrap p-2 space-x-2 space-y-2 justify-around items-center bg-gray-300/10 rounded-lg",
         onClick: (e) => {
           e.stopPropagation();
         }
       },
       advantageButton,
       disadvantageButton,
-      bonusButtons
+      encounter_buttons
     );
     let statblocks = [];
     for (let statblock of Object.keys(foundEncounter)) {
@@ -358,8 +406,8 @@ var renderComponent = (uuid, data, slotSettings) => {
       let attack_bonus = foundEncounter[statblock]?.["attack-bonus"];
       let bonusString = getBonusString(attack_bonus);
       let isActive = statblock === active_statblock;
-      let buttonClass = getStatblockClass(isActive);
-      let buttonClick = getOnClick(statblocksURL, {
+      let buttonClass2 = getStatblockClass(isActive);
+      let buttonClick2 = getOnClick(statblocksURL, {
         encounter: foundEncounterName,
         active_statblock: statblock
       });
@@ -368,8 +416,8 @@ var renderComponent = (uuid, data, slotSettings) => {
           /* @__PURE__ */ React.createElement("p", null, statblock),
           /* @__PURE__ */ React.createElement("p", { className: "opacity-50" }, bonusString)
         ],
-        buttonClass,
-        buttonClick,
+        buttonClass2,
+        buttonClick2,
         `statblock-${statblock}`
       );
       statblocks.push(statblockButton);
@@ -381,7 +429,7 @@ var renderComponent = (uuid, data, slotSettings) => {
     let statblockList = /* @__PURE__ */ React.createElement(
       "div",
       {
-        className: "w-full h-[75%] overflow-scroll bg-gray-300/10 rounded-lg py-2",
+        className: "w-full h-fit bg-gray-300/10 rounded-lg py-2",
         onClick: (e) => {
           e.stopPropagation();
         }
@@ -391,7 +439,7 @@ var renderComponent = (uuid, data, slotSettings) => {
     );
     encounterElements.push(buttonPanel, statblockList);
   }
-  let encounterPane = /* @__PURE__ */ React.createElement("div", { className: "flex flex-col w-full h-full justify-between items-center" }, encounterElements);
+  let encounterPane = /* @__PURE__ */ React.createElement("div", { className: "flex flex-col w-full h-fit space-y-2 justify-between items-center" }, encounterElements);
   let hitColor = slotSettings?.colors?.["general/hit"] || "rgba(64, 172, 83, 1)";
   let partyElements = [];
   for (let sourceName in data) {
@@ -594,7 +642,7 @@ var renderComponent = (uuid, data, slotSettings) => {
     ), /* @__PURE__ */ React.createElement(
       "div",
       {
-        className: "w-full h-[65%] rounded-md p-2",
+        className: "w-full h-[65%] overflow-scroll rounded-md p-2",
         style: {
           backgroundColor: backgroundColorEncounter
         }
